@@ -1,0 +1,126 @@
+140 WAVE "Data_1.wav"
+
+141 WAVE "Data_2.wav"
+
+142 WAVE "Data_3.wav"
+
+143 WAVE "Data_4.wav"
+
+144 WAVE "Data_5.wav"
+
+145 WAVE "Data_6.wav"
+
+146 WAVE "Data_7.wav"
+
+103 BITMAP "Bitmap_1.bmp"
+
+104 BITMAP "Bitmap_2.bmp"
+
+106 BITMAP "Bitmap_3.bmp"
+
+113 BITMAP "Bitmap_4.bmp"
+
+114 BITMAP "Bitmap_5.bmp"
+
+115 BITMAP "Bitmap_6.bmp"
+
+119 BITMAP "Bitmap_7.bmp"
+
+120 BITMAP "Bitmap_8.bmp"
+
+121 BITMAP "Bitmap_9.bmp"
+
+122 BITMAP "Bitmap_10.bmp"
+
+123 BITMAP "Bitmap_11.bmp"
+
+124 BITMAP "Bitmap_12.bmp"
+
+125 BITMAP "Bitmap_13.bmp"
+
+126 BITMAP "Bitmap_14.bmp"
+
+131 BITMAP "Bitmap_15.bmp"
+
+133 BITMAP "Bitmap_16.bmp"
+
+IDR_MENU1 MENU
+LANGUAGE LANG_JAPANESE, 0x1
+{
+POPUP "게임(&G)"
+{
+	MENUITEM "게임 중지(&P)",  40013
+	MENUITEM "게임 리셋(&R)",  40003
+	MENUITEM SEPARATOR
+	MENUITEM "게임 종료(&Q)",  40001
+}
+POPUP "설정(&C)"
+{
+	POPUP "게임 속도(&S)"
+	{
+		MENUITEM "느리게(&L)",  40004
+		MENUITEM "보통(&M)",  40005
+		MENUITEM "빠르게(&H)",  40006
+	}
+	POPUP "게임 점수(&P)"
+	{
+		MENUITEM "5포인트(&A)",  40009
+		MENUITEM "10포인트(&B)",  40010
+		MENUITEM "15포인트(&C)",  40011
+	}
+}
+POPUP "윈도우(&W)"
+{
+	MENUITEM "게임 창을 원래 자리로(&W)",  40012
+}
+POPUP "도움(&H)"
+{
+	MENUITEM "게임 정보(&A)",  40002
+}
+MENUITEM "디버그(&D)",  40007
+}
+
+117 DIALOG 0, 0, 167, 87
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "피카츄 배구 정보"
+LANGUAGE LANG_JAPANESE, 0x1
+FONT 9, "ＭＳ Ｐゴシック"
+{
+   CONTROL "OK", 1002, BUTTON, BS_DEFPUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 59, 65, 50, 14 
+   CONTROL "1997 (C)SACHI SOFT / SAWAYAKAN Programmers", -1, STATIC, SS_LEFT | WS_CHILD | WS_VISIBLE | WS_GROUP, 7, 13, 153, 8 
+   CONTROL "비스타 호환 버전 by 곽준영", -1, STATIC, SS_LEFTNOWORDWRAP | WS_CHILD | WS_VISIBLE | WS_GROUP, 41, 36, 100, 8 
+   CONTROL "Ver 1.0", -1, STATIC, SS_LEFT | WS_CHILD | WS_VISIBLE | WS_GROUP, 69, 49, 31, 8 
+   CONTROL "1997(C) Satoshi Takenouchi", -1, STATIC, SS_LEFT | WS_CHILD | WS_VISIBLE | WS_GROUP, 41, 23, 83, 8 
+}
+
+IDI_PIKAICON ICON "Icon_1.ico"
+
+
+1 VERSIONINFO
+FILEVERSION 1,0,0,1
+PRODUCTVERSION 1,0,0,1
+FILEOS 0x40004
+FILETYPE 0x1
+{
+BLOCK "StringFileInfo"
+{
+	BLOCK "041104b0"
+	{
+		VALUE "Comments", "??ぴかちゅ～　バレ?編(ベ?タ版）"
+		VALUE "CompanyName", "1997 (C)SACHI SOFT"
+		VALUE "FileDescription", "PIKA_V"
+		VALUE "FileVersion", "1, 0, 0, 1"
+		VALUE "InternalName", "PIKA_V"
+		VALUE "LegalCopyright", "Copyright (C) 1997"
+		VALUE "OriginalFilename", "PIKA_V.exe"
+		VALUE "ProductName", "??ぴかちゅ～　バレ?編"
+		VALUE "ProductVersion", "1, 0, 0, 1"
+	}
+}
+
+BLOCK "VarFileInfo"
+{
+	VALUE "Translation", 0x0411 0x04B0
+}
+}
+
