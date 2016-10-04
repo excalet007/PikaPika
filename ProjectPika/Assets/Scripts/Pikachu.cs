@@ -10,10 +10,24 @@ public class Pikachu : MonoBehaviour {
 	public Vector3 right;
 
     private int playerNum;
-	private PikachuState playerState;
-	private PikachuHitState hitState;
+	private pikachuState playerState;
+	private pikachuHitState hitState;
 	private Dictionary<string, KeyCode> keys = new Dictionary<string, KeyCode> ();
-	private Vector3 dir = new Vector3();
+//	private Vector3 dir = new Vector3();
+	private Vector3 updownAccel = new Vector3();
+
+	public pikachuState PlayerState {
+		get {
+			return playerState;
+		}
+		set {
+			playerState = value;
+			if (playerState == pikachuState.Ground) {
+				updownAccel = new Vector3 ();
+				Debug.Log (updownAccel);
+			}
+		}
+	}
 
 	/***** Constructors *****/
 	/*
@@ -41,15 +55,15 @@ public class Pikachu : MonoBehaviour {
 
 	/***** MonoBehaviour *****/
 	void Start () {
-		playerState = PikachuState.AirDrop;
-		hitState = PikachuHitState.Normal;
+		playerState = pikachuState.AirDrop;
+		hitState = pikachuHitState.Normal;
 
-		playerNum = 2;
-		keys.Add ("UP", KeyCode.UpArrow);
-		keys.Add ("DOWN", KeyCode.DownArrow);
-		keys.Add ("LEFT", KeyCode.LeftArrow);
-		keys.Add ("RIGHT", KeyCode.RightArrow);
-		keys.Add ("SMASH", KeyCode.Return);
+		playerNum = 1;
+		keys.Add ("UP", KeyCode.W);
+		keys.Add ("DOWN", KeyCode.S);
+		keys.Add ("LEFT", KeyCode.A);
+		keys.Add ("RIGHT", KeyCode.D);
+		keys.Add ("SMASH", KeyCode.F);
 	}
 
 	void Update () {
@@ -57,39 +71,67 @@ public class Pikachu : MonoBehaviour {
 		Debug.Log (playerState);
 	}
 
-	void OnCollisionEnter2D(Collision2D col) {
-		if (col.gameObject.tag == "Ground")
-			playerState = PikachuState.Ground;
-	}
+
+//	void OnCollisionEnter2D(Collision2D col) {
+//		if (col.gameObject.tag == "Ground")
+//			playerState = pikachuState.Ground;
+//	}
 
 	/***** Methods *****/
 
 	void Move() {
+		Vector3 dir = new Vector3 ();
 		if (Input.anyKey) { //move when input is given
-			if (Input.GetKeyDown (keys["UP"]) && playerState == PikachuState.Ground) {
-				playerState = PikachuState.Jump;
+			if (Input.GetKey (keys["UP"]) && playerState == pikachuState.Ground) {
+				playerState = pikachuState.Jump;
 			}
 			if (Input.GetKey (keys["LEFT"])) {
-				dir -= right;
+				dir -= right * Time.deltaTime;
 			}
 			if (Input.GetKey (keys["RIGHT"])) {
-				dir += right;
+				dir += right * Time.deltaTime;
 			}
 		}
-		if (playerState == PikachuState.Ground) { //else don't do anything(gravity not affected)
+		/*
+		else if (playerState == pikachuState.Ground) { //else don't do anything(gravity not affected)
+			return;
+		}
+		if (playerState == pikachuState.Ground) { //else don't do anything(gravity not affected)
 			transform.Translate (dir);
 			return;
 		}
 
-		if (playerState == PikachuState.Jump) {
+		if (playerState == pikachuState.Jump) {
 			if (transform.position.y < jumpLimit)
-				dir += jump;
+				updownAccel += jump;
 			else {
-				playerState = PikachuState.AirDrop;
-				dir = new Vector3 ();
+				playerState = pikachuState.AirDrop;
 			}
 		}
-		dir -= gravity;
+		updownAccel -= gravity;
+		dir += updownAccel;
 		transform.Translate (dir);
+		*/
+//		if (playerState == pikachuState.Jump) {
+//			if (transform.position.y > jumpLimit)
+//				PlayerState = pikachuState.AirDrop;
+//		}
+
+		switch (playerState) {
+		case pikachuState.Ground:
+			transform.position += dir;
+			break;
+		case pikachuState.Jump:
+			updownAccel += jump;
+			dir += updownAccel;
+			transform.position += dir;
+			PlayerState = pikachuState.AirDrop;
+			break;
+		case pikachuState.AirDrop:
+			updownAccel -= gravity * Time.deltaTime;
+			dir += updownAccel;
+			transform.position += dir;
+			break;
+		}
 	}
 }

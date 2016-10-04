@@ -3,7 +3,7 @@ using System.Collections;
 
 public class PlayManager : MonoBehaviour {
 
-	private static PlayState playState;
+	private static playState playState;
 	private static int score1;
 	private static int score2;
 
