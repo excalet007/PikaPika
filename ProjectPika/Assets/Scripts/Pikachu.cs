@@ -26,7 +26,6 @@ public class Pikachu : MonoBehaviour {
 			playerState = value;
 			if (playerState == pikachuState.Ground) {
 				updownAccel = new Vector3 ();
-				Debug.Log (updownAccel);
 			}
 		}
 	}
@@ -69,7 +68,7 @@ public class Pikachu : MonoBehaviour {
 	}
 
 	void Update () {
-		if (transform.position.y - height + updownAccel.y < 0f + offset) {
+		if (transform.position.y - height + updownAccel.y * Time.deltaTime < 0f + offset) {
 			PlayerState = pikachuState.Ground;
 			transform.position = new Vector3 (transform.position.x, height, transform.position.z);
 		}
@@ -89,7 +88,7 @@ public class Pikachu : MonoBehaviour {
 		Vector3 dir = new Vector3 ();
 		if (Input.anyKey) { //move when input is given
 			if (Input.GetKey (keys["UP"]) && playerState == pikachuState.Ground) {
-				playerState = pikachuState.Jump;
+				PlayerState = pikachuState.Jump;
 			}
 			if (Input.GetKey (keys["LEFT"])) {
 				dir -= right * Time.deltaTime;
@@ -128,7 +127,7 @@ public class Pikachu : MonoBehaviour {
 			transform.position += dir;
 			break;
 		case pikachuState.Jump:
-			updownAccel += jump;
+			updownAccel += jump * Time.deltaTime;
 			dir += updownAccel;
 			transform.position += dir;
 			PlayerState = pikachuState.AirDrop;
