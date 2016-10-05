@@ -4,7 +4,6 @@ using UnityEngine.SceneManagement;
 
 public class Ball : MonoBehaviour {
 
-
     // 다른 곳과 공유하는 정보
     public ballState bS = ballState.Normal;
     public bouncePoint bP = bouncePoint.None;
@@ -74,6 +73,7 @@ public class Ball : MonoBehaviour {
             velocity.x += keyTestSpeed;
         }
     }
+
     void SceneReset()
     {
         SceneManager.LoadScene("GamePlay");
@@ -296,4 +296,4 @@ public class Ball : MonoBehaviour {
         MoveBall();
     }
 
-}   
+} 

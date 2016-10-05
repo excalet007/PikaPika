@@ -21,7 +21,7 @@ public enum pikachuState
 {
     Ground, Jump, AirDrop, Receive, GameOver
 }
-    
+
 public enum pikachuHitState
 {
     Normal, HitSmash, HitShow
