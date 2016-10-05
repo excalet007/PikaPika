@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 public class Pikachu : MonoBehaviour {
 
+	public float offset;
 	public float jumpLimit;
 	public Vector3 gravity;
 	public Vector3 jump;
@@ -67,6 +68,10 @@ public class Pikachu : MonoBehaviour {
 	}
 
 	void Update () {
+		if (transform.position.y - 0.5f < 0f + offset) {
+			PlayerState = pikachuState.Ground;
+			transform.position = new Vector3 (transform.position.x, 0.5f, transform.position.z);
+		}
 		Move ();
 		Debug.Log (playerState);
 	}
