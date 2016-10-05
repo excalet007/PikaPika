@@ -9,6 +9,7 @@ public class Pikachu : MonoBehaviour {
 	public Vector3 gravity;
 	public Vector3 jump;
 	public Vector3 right;
+	public float height = 0.5f;
 
     private int playerNum;
 	private pikachuState playerState;
@@ -68,9 +69,9 @@ public class Pikachu : MonoBehaviour {
 	}
 
 	void Update () {
-		if (transform.position.y - 0.5f < 0f + offset) {
+		if (transform.position.y - height + updownAccel.y < 0f + offset) {
 			PlayerState = pikachuState.Ground;
-			transform.position = new Vector3 (transform.position.x, 0.5f, transform.position.z);
+			transform.position = new Vector3 (transform.position.x, height, transform.position.z);
 		}
 		Move ();
 		Debug.Log (playerState);
