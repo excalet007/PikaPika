@@ -11,8 +11,14 @@ public class PlayManager : MonoBehaviour {
 	private static playState playState;
 	private static int score1;
 	private static int score2;
+    public Image Score1Image;
+    public Image Score2Image;
+    public Image GameSetImage;
 
-	public static float[] mapInfo = new float[5]{20f, 5f, 0.2f, 2f, 0.2f}; //0: map width, 1: map height, 2: net width, 3: net height, 4: topnet height
+    public static Sprite[] scoreImageList = new Sprite[16]; // 점수 스프라이트를 불러오기 위한 배열
+    
+
+    public static float[] mapInfo = new float[5]{20f, 5f, 0.2f, 2f, 0.2f}; //0: map width, 1: map height, 2: net width, 3: net height, 4: topnet height
 	public static float ballRadius = 0.5f;
 	public static float pikaBelly = 0.5f;
 	public static float pikaBot = 0.5f;
@@ -42,7 +48,9 @@ public class PlayManager : MonoBehaviour {
 			instance = this;
 		else
 			Destroy (this);
-	}
+
+        
+    }
 
 	void Start() {
 		player1.AddComponent<Pikachu> ().PlayerNum = 1; //adding scripts to both players
@@ -50,5 +58,62 @@ public class PlayManager : MonoBehaviour {
 
 		score1 = 0;
 		score2 = 0;
-	}
+
+        Score1Image = GameObject.Find("Score1").GetComponent<Image>();
+        Score2Image = GameObject.Find("Score2").GetComponent<Image>();
+        GameSetImage = GameObject.Find("GameSet").GetComponent<Image>();
+        
+
+        for (int i = 0; i < 16; i++)
+        {
+            scoreImageList[i] = Resources.Load<Sprite>("Score/ScoreNumbers_" + i);
+
+        }
+        Score1Image.sprite = scoreImageList[score1];
+        Score2Image.sprite = scoreImageList[score2];
+
+        GameSetImage.sprite = Resources.Load<Sprite>("");
+        GameSetImage.transform.gameObject.SetActive(false);
+    }
+
+    void Update()
+    {
+
+
+
+        if (Input.GetKeyDown(KeyCode.H))
+        {
+            score1++;
+            UpdateScore();
+            print("1p scoreup");
+        }
+        
+        if(Input.GetKeyDown(KeyCode.J))
+        {
+            score2++;
+            UpdateScore();
+            print("2p scoreup");
+        }
+
+        DisplayGameSet();
+    }
+
+    void UpdateScore()
+    {
+        Score1Image.sprite = scoreImageList[score1];
+        Score2Image.sprite = scoreImageList[score2];
+    }
+
+    void DisplayGameSet()
+    {
+        if(score1 == 15 || score2 == 15)
+        {
+            GameSetImage.transform.gameObject.SetActive(true);
+        }
+    }
+
+    void ResetGame(bool OnScoring)
+    {
+
+    }
 }
