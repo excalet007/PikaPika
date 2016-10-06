@@ -27,3 +27,7 @@ public enum pikachuHitState
     Normal, HitSmash, HitShow
 }
 
+public enum smashState
+{
+	
+}
