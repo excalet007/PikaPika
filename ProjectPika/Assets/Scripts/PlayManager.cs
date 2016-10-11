@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine.UI;
 
 public class PlayManager : MonoBehaviour {
-	private PlayManager instance = null; //for singleton design
+	private static PlayManager instance = null; //for singleton design
     public GameManager gameManager;
     public Pikachu pikachu;
 
