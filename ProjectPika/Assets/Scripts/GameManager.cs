@@ -21,7 +21,7 @@ public class GameManager : MonoBehaviour {
 
     }
 
-    public void ResetPlay(bool player1Win)
+    public void ResetPlay()
     {
         
     }

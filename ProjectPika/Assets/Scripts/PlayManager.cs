@@ -6,10 +6,11 @@ public class PlayManager : MonoBehaviour {
 	private PlayManager instance = null; //for singleton design
     public GameManager gameManager;
     public Pikachu pikachu;
+    public GameObject ball;
 
 	public GameObject player1;
 	public GameObject player2;
-
+    
 	private static playState playState;
 	private static int score1;
 	private static int score2;
@@ -52,7 +53,9 @@ public class PlayManager : MonoBehaviour {
 		else
 			Destroy (this);
 
-        
+        DontDestroyOnLoad(Score1Image);
+        DontDestroyOnLoad(Score2Image);
+
     }
 
 	void Start() {
@@ -65,8 +68,11 @@ public class PlayManager : MonoBehaviour {
         Score1Image = GameObject.Find("Score1").GetComponent<Image>();
         Score2Image = GameObject.Find("Score2").GetComponent<Image>();
         GameSetImage = GameObject.Find("GameSet").GetComponent<Image>();
-        
-        
+
+        ball.transform.position = new Vector3(-0.4f * mapInfo[0], 0.8f * mapInfo[1], 0);
+
+        ResetPlayer();
+        ResetBall(1);            
 
         for (int i = 0; i < 16; i++)
         {
@@ -83,7 +89,15 @@ public class PlayManager : MonoBehaviour {
     void Update()
     {
 
+        if (Input.GetKeyDown(KeyCode.Y))
+        {
+            StartCoroutine("ResetPlayScene1");
+        }
 
+        if (Input.GetKeyDown(KeyCode.U))
+        {
+            StartCoroutine("ResetPlayScene2");
+        }
 
         if (Input.GetKeyDown(KeyCode.H))
         {
@@ -128,6 +142,27 @@ public class PlayManager : MonoBehaviour {
         
     }
     
+    IEnumerator ResetPlayScene1()
+    {
+        float fadetime = GameObject.Find("FadeControl").GetComponent<Fading>().BeginFade(1);
+        yield return new WaitForSeconds(fadetime);
+        ResetPlayer();
+        ResetBall(1);
+        float fadetime2 = GameObject.Find("FadeControl").GetComponent<Fading>().BeginFade(-1);
+        yield return new WaitForSeconds(fadetime2);
+        
+    }
+
+    IEnumerator ResetPlayScene2()
+    {
+        float fadetime = GameObject.Find("FadeControl").GetComponent<Fading>().BeginFade(1);
+        yield return new WaitForSeconds(fadetime);
+        ResetPlayer();
+        ResetBall(2);
+        float fadetime2 = GameObject.Find("FadeControl").GetComponent<Fading>().BeginFade(-1);
+        yield return new WaitForSeconds(fadetime2);
+        
+    }
 
     IEnumerator Wait()
     {
@@ -140,6 +175,27 @@ public class PlayManager : MonoBehaviour {
             yield return null; //Don't freeze Unity
         }
         gameManager.EndGame();
+    }
+
+    public void ResetPlayer()
+    {
+        player1.transform.position = new Vector3(-0.4f * mapInfo[0], 0.01f * mapInfo[1], 0); // 
+        player2.transform.position = new Vector3(0.4f * mapInfo[0], 0.01f * mapInfo[1], 0);  // position.x 값은 0.35~0.4 * mapInfo[0] 정도로 할것
+
+    }
+
+    public void ResetBall(int winner)
+    {
+        switch (winner)
+        {
+            case 1:
+                ball.transform.position = new Vector3(-0.4f * mapInfo[0], 0.8f * mapInfo[1], 0);
+                break;
+
+            case 2:
+                ball.transform.position = new Vector3(0.4f * mapInfo[0], 0.8f * mapInfo[1], 0);
+                break;
+        }
     }
 
 }
