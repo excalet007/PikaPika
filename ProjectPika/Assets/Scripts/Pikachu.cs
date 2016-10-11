@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class Pikachu : MonoBehaviour {
+    
 
 	public float offset = 0.01f;
 	public Vector3 gravity = new Vector3(0f, 1f, 0f);

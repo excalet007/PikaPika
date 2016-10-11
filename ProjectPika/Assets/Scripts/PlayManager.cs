@@ -4,6 +4,8 @@ using UnityEngine.UI;
 
 public class PlayManager : MonoBehaviour {
 	private PlayManager instance = null; //for singleton design
+    public GameManager gameManager;
+    public Pikachu pikachu;
 
 	public GameObject player1;
 	public GameObject player2;
@@ -22,6 +24,7 @@ public class PlayManager : MonoBehaviour {
 	public static float ballRadius = 0.5f;
 	public static float pikaBelly = 0.5f;
 	public static float pikaBot = 0.5f;
+
 
 	/***** Getters and Setters *****/
 	public static int Score1 {
@@ -63,6 +66,7 @@ public class PlayManager : MonoBehaviour {
         Score2Image = GameObject.Find("Score2").GetComponent<Image>();
         GameSetImage = GameObject.Find("GameSet").GetComponent<Image>();
         
+        
 
         for (int i = 0; i < 16; i++)
         {
@@ -72,7 +76,7 @@ public class PlayManager : MonoBehaviour {
         Score1Image.sprite = scoreImageList[score1];
         Score2Image.sprite = scoreImageList[score2];
 
-        GameSetImage.sprite = Resources.Load<Sprite>("");
+        GameSetImage.sprite = Resources.Load<Sprite>("게임화면_GameSet");
         GameSetImage.transform.gameObject.SetActive(false);
     }
 
@@ -95,7 +99,7 @@ public class PlayManager : MonoBehaviour {
             print("2p scoreup");
         }
 
-        DisplayGameSet();
+        GameSet();
     }
 
     void UpdateScore()
@@ -104,16 +108,38 @@ public class PlayManager : MonoBehaviour {
         Score2Image.sprite = scoreImageList[score2];
     }
 
-    void DisplayGameSet()
+    public void GameSet()
     {
-        if(score1 == 15 || score2 == 15)
+        if (score1 == 15 || score2 == 15)
         {
-            GameSetImage.transform.gameObject.SetActive(true);
+            print("GameSet");
+            GameSetImage.transform.gameObject.SetActive(true); // Print Game Set Message
+
+            if (pikachu.PlayerState == pikachuState.Ground)
+            {
+                player1.GetComponent<Pikachu>().enabled = false; // 
+                player2.GetComponent<Pikachu>().enabled = false; //1P와 2P 의 피카츄 움직임 스크립트 Disable
+            }
+
+
+            StartCoroutine("Wait");
+            
         }
+        
     }
+    
 
-    void ResetGame(bool OnScoring)
+    IEnumerator Wait()
     {
-
+        const float waitTime = 3f;
+        float counter = 0f;
+        
+        while (counter < waitTime)
+        {
+            counter += Time.deltaTime;
+            yield return null; //Don't freeze Unity
+        }
+        gameManager.EndGame();
     }
+
 }
