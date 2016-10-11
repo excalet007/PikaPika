@@ -15,7 +15,8 @@ public class Pikachu : MonoBehaviour {
 	private pikachuHitState hitState;
 	private Dictionary<string, KeyCode> keys = new Dictionary<string, KeyCode> ();
 	private Vector3 updownAccel = new Vector3();
-	private Move move;
+	private Move move; //delegate function to choose player1/player2
+	private bool smashCounter = false; //used to limit smash time, true:smash cooldown
 
 	/***** Getters and Setters *****/
 	public pikachuState PlayerState {
@@ -50,8 +51,9 @@ public class Pikachu : MonoBehaviour {
 			keys.Add ("DOWN", KeyCode.S);
 			keys.Add ("LEFT", KeyCode.A);
 			keys.Add ("RIGHT", KeyCode.D);
-			keys.Add ("SMASH", KeyCode.F);
+			keys.Add ("SMASH", KeyCode.Space);
 			move = new Move (Move_1p);
+			move += Smash_1p;
 			break;
 		case 2:
 			keys.Add ("UP", KeyCode.UpArrow);
@@ -60,6 +62,7 @@ public class Pikachu : MonoBehaviour {
 			keys.Add ("RIGHT", KeyCode.RightArrow);
 			keys.Add ("SMASH", KeyCode.Return);
 			move = new Move (Move_2p);
+			move += Smash_2p;
 			break;
 		}
 	}
@@ -67,7 +70,6 @@ public class Pikachu : MonoBehaviour {
 	void Update () {
 		CheckGround();
 		move();
-		Debug.Log (playerState);
 	}
 
 	/***** Methods *****/
@@ -77,11 +79,13 @@ public class Pikachu : MonoBehaviour {
 	void CheckGround() {
 		if (transform.position.y - PlayManager.pikaBot + updownAccel.y * Time.deltaTime < 0f + offset) {
 			PlayerState = pikachuState.Ground;
+			if(hitState == pikachuHitState.Normal)
+				smashCounter = false; //cooldown over
 			transform.position = new Vector3 (transform.position.x, PlayManager.pikaBot, transform.position.z);
 		}
 	}
 
-	void Move_1p() {
+	private void Move_1p() {
 		Vector3 dir = new Vector3 ();
 		if (Input.anyKey) { //move when input is given
 			if (Input.GetKey (keys ["UP"]) && playerState == pikachuState.Ground) {
@@ -110,7 +114,6 @@ public class Pikachu : MonoBehaviour {
 			updownAccel += jump;
 			dir += updownAccel;
 			transform.position += dir;
-			Debug.Log ("accel:" + updownAccel);
 			PlayerState = pikachuState.AirDrop;
 			break;
 		case pikachuState.AirDrop:
@@ -121,7 +124,7 @@ public class Pikachu : MonoBehaviour {
 		}
 	}
 
-	void Move_2p() {
+	private void Move_2p() {
 		Vector3 dir = new Vector3 ();
 		if (Input.anyKey) { //move when input is given
 			if (Input.GetKey (keys ["UP"]) && playerState == pikachuState.Ground) {
@@ -161,11 +164,68 @@ public class Pikachu : MonoBehaviour {
 		}
 	}
 
-	void Smash_1p() {
-		
+	private void ReturnNormalHitState() {
+		hitState = pikachuHitState.Normal;
 	}
 
-	void Smash_2p() {
-		
+	private void Smash_1p() {
+		if (Input.GetKeyDown (keys ["SMASH"]) && !smashCounter && PlayerState == pikachuState.AirDrop) { //airborn smash
+			if (Input.GetKey (keys ["DOWN"])) {
+				if (Input.GetKey (keys ["RIGHT"]) || Input.GetKey(keys["LEFT"]))
+					hitState = pikachuHitState.HitSmash_DownRight;
+				else
+					hitState = pikachuHitState.HitSmash_Down;
+			}
+			else if (Input.GetKey (keys ["UP"])) {
+				if (Input.GetKey (keys ["RIGHT"]) || Input.GetKey(keys["LEFT"]))
+					hitState = pikachuHitState.HitSmash_UpRight;
+				else
+					hitState = pikachuHitState.HitSmash_Up;
+			}
+			else if (Input.GetKey (keys["RIGHT"]) || Input.GetKey(keys["LEFT"])) {
+				hitState = pikachuHitState.HitSmash_Right;
+			} else
+				hitState = pikachuHitState.HitSlow;
+			smashCounter = true;//cooldown until lands ground
+			Debug.Log("1p hitstate:"+hitState+"counter"+smashCounter);
+		}
+		else if (Input.GetKeyDown (keys ["SMASH"]) && !smashCounter && PlayerState == pikachuState.Ground) {
+			if (Input.GetKey (keys ["LEFT"]))
+				PlayerState = pikachuState.Receive_Left;
+			if (Input.GetKey (keys ["RIGHT"]))
+				PlayerState = pikachuState.Receive_Right;
+			Debug.Log("1p state:"+playerState+"counter"+smashCounter);
+		}
+		Invoke ("ReturnNormalHitState", 0.5f);
+	}
+
+	private void Smash_2p() {
+		if (Input.GetKeyDown (keys ["SMASH"]) && !smashCounter && PlayerState == pikachuState.AirDrop) { //airborn smash
+			if (Input.GetKey (keys ["DOWN"])) {
+				if (Input.GetKey (keys ["RIGHT"]) || Input.GetKey(keys["LEFT"]))
+					hitState = pikachuHitState.HitSmash_DownLeft;
+				else
+					hitState = pikachuHitState.HitSmash_Down;
+			}
+			else if (Input.GetKey (keys ["UP"])) {
+				if (Input.GetKey (keys ["RIGHT"]) || Input.GetKey(keys["LEFT"]))
+					hitState = pikachuHitState.HitSmash_UpLeft;
+				else
+					hitState = pikachuHitState.HitSmash_Up;
+			}
+			else if (Input.GetKey (keys["RIGHT"]) || Input.GetKey(keys["LEFT"])) {
+				hitState = pikachuHitState.HitSmash_Left;
+			} else
+				hitState = pikachuHitState.HitSlow;
+			smashCounter = true; //cooldown until lands ground
+			Debug.Log("2p hitstate:"+hitState+"counter"+smashCounter);
+		}
+		else if (Input.GetKeyDown (keys ["SMASH"]) && !smashCounter && PlayerState == pikachuState.Ground) {
+			if (Input.GetKey (keys ["LEFT"]))
+				PlayerState = pikachuState.Receive_Left;
+			if (Input.GetKey (keys ["RIGHT"]))
+				PlayerState = pikachuState.Receive_Right;
+		}
+		Invoke ("ReturnNormalHitState", 0.5f);
 	}
 }

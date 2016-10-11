@@ -19,15 +19,12 @@ public enum bouncePoint
 
 public enum pikachuState
 {
-    Ground, Jump, AirDrop, Receive, GameOver
+    Ground, Jump, AirDrop, Receive_Left, Receive_Right, GameOver
 }
 
 public enum pikachuHitState
 {
-    Normal, HitSmash, HitShow
+    Normal, HitSmash_Left, HitSmash_Right, HitSmash_UpLeft, HitSmash_UpRight, HitSmash_DownRight, 
+	HitSmash_DownLeft, HitSmash_Down, HitSmash_Up, HitSlow
 }
-
-public enum smashState
-{
 	
-}
