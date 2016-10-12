@@ -6,6 +6,8 @@ public class Ball : MonoBehaviour
 {
 
     /***** MonoBehaviour *****/
+    //초기화
+
     void FixedUpdate()
     {
         KeyControl();
@@ -74,7 +76,6 @@ public class Ball : MonoBehaviour
     private Vector2 pika1Velocity;
     private Vector2 pika2Velocity;
 
-
     void Bounce()
     {
         // 피카츄 콜라이더 오프셋
@@ -94,9 +95,10 @@ public class Ball : MonoBehaviour
     public ballState bS = ballState.Normal;
     public float gravity = -1f;
     public float reflectionCoefficient = 1.2f;
-    public float maxSpeed = 7f;
-    public float minSpeed = 4.5f;
-    public Vector3 velocity = new Vector3(0, 0, 0);
+    public static float maxSpeed = 7f;
+    public static float minSpeed = 4.5f;
+    public static Vector3 velocity = new Vector3(0, 0, 0);
+    //public PlayManager playManager;
 
     void CalculateVelocity()
     {
@@ -115,10 +117,20 @@ public class Ball : MonoBehaviour
             if (wallHit.collider.gameObject.CompareTag("top") == true && bS == ballState.Smash)
                 velocity.x = reflectionCoefficient;
 
-            //3.2.3 바닥충돌
+            //3.2.3 바닥충돌 _ 점수증가
             if (wallHit.collider.gameObject.CompareTag("bottom"))
-                velocity *= 0.85f;
-
+            {
+                velocity *= 0.8f;
+                minSpeed = 0;
+                if(this.transform.position.x <=0)
+                {
+                    PlayManager.Instance.Score2++;
+                } 
+                else if(this.transform.position.x>0)
+                {
+                    PlayManager.Instance.Score1++;
+                }
+            }
         }
 
         // 3.3 최대/ 최소속도 제한
@@ -139,36 +151,55 @@ public class Ball : MonoBehaviour
         //일반이동
         this.transform.position += velocity * Time.deltaTime;
 
-        //피카충돌(탈주방지)
-        if (wallHit.collider.CompareTag("player1") == true)
+        //피카충돌시 이동 보정
+        if (wallHit.collider != null)
         {
-            Debug.Log("It Activates!");
-            
-            float pika1TempX = pika1Velocity.x;
-            float pika1TempY = pika1Velocity.y;
+            if (wallHit.collider.CompareTag("player1") == true)
+            {
+                float pika1TempX = pika1Velocity.x;
+                float pika1TempY = pika1Velocity.y;
+                
+                Vector3 pika1TempVelocity = new Vector3(pika1TempX, pika1TempY, 0);
+                this.transform.position += pika1TempVelocity * Time.fixedDeltaTime;
+            }
 
-            Vector3 pika1TempVelocity = new Vector3(pika1TempX, pika1TempY, 0);
+            if (wallHit.collider.CompareTag("player2") == true)
+            {
+                float pika2TempX = pika2Velocity.x;
+                float pika2TempY = pika2Velocity.y;
 
-            this.transform.position += pika1TempVelocity * Time.fixedDeltaTime;
-        }
-
-        if (wallHit.collider.CompareTag("player2") == true)
-        {
-            float pika2TempX = pika2Velocity.x;
-            float pika2TempY = pika2Velocity.y;
-
-            Vector3 pika2TempVelocity = new Vector3(pika2TempX, pika2TempY, 0);
-
-            this.transform.position += pika2TempVelocity * Time.fixedDeltaTime;
+                Vector3 pika2TempVelocity = new Vector3(pika2TempX, pika2TempY, 0);
+                this.transform.position += pika2TempVelocity * Time.fixedDeltaTime;
+            }
         }
     }
 
     // 5. 디버그용 함수
-    public PlayManager playManager;
-
     void ErrorCheck()
     {
+        float smallOffSet = 0.05f;
         // 탈주체크
+        if (this.transform.position.x < -(PlayManager.mapInfo[0]/2 - ballRadius))
+        {
+            print("왼쪽 탈주");
+            this.transform.position = new Vector3(-(PlayManager.mapInfo[0] / 2 - ballRadius) +smallOffSet, this.transform.position.y, this.transform.position.z);
+        }
+        if (this.transform.position.x > (PlayManager.mapInfo[0] / 2 - ballRadius))
+        {
+            print("오른쪽 탈주");
+            this.transform.position = new Vector3((PlayManager.mapInfo[0] / 2 - ballRadius) - smallOffSet, this.transform.position.y, this.transform.position.z);
+        }
+        if (this.transform.position.y > (PlayManager.mapInfo[1]- ballRadius))
+        {
+            print("위쪽 탈주");
+            this.transform.position = new Vector3(this.transform.position.x , PlayManager.mapInfo[1] -ballRadius- smallOffSet, this.transform.position.z);
+        }
+        if (this.transform.position.y < (ballRadius))
+        {
+            print("아래쪽 탈주");
+            this.transform.position = new Vector3(this.transform.position.x, ballRadius + smallOffSet, this.transform.position.z);
+        }
+
 
         // 콜라이더 체크
         if (wallHit.collider != null)
@@ -177,17 +208,14 @@ public class Ball : MonoBehaviour
             Debug.DrawLine(wallHit.point, wallHit.point + Vector2.up * ballRadius, Color.blue);
             Debug.DrawLine(wallHit.point, wallHit.point + Vector2.down * ballRadius, Color.blue);
             Debug.DrawLine(wallHit.point, wallHit.point + Vector2.right * ballRadius, Color.blue);
-            distanceVector = wallHit.point - (Vector2)this.transform.position;
-            Debug.Log("부딪힌 점과 중점에서의 거리는 " + distanceVector.magnitude);
-            Debug.Log("이동 거리는 " + velocity.magnitude * Time.deltaTime);
-            Debug.Log("distance는 " + wallHit.distance);
-            Debug.Log("fraction은 " + wallHit.fraction);
+            //distanceVector = wallHit.point - (Vector2)this.transform.position;
+            //Debug.Log("부딪힌 점과 중점에서의 거리는 " + distanceVector.magnitude);
+            //Debug.Log("이동 거리는 " + velocity.magnitude * Time.deltaTime);
+            //Debug.Log("distance는 " + wallHit.distance);
+            //Debug.Log("fraction은 " + wallHit.fraction);
 
         }
-        Debug.DrawLine(this.transform.position, wallHit.point, Color.red);
         Debug.DrawRay(this.transform.position, velocity / velocity.magnitude, Color.green);
     }
-
-
 
 }

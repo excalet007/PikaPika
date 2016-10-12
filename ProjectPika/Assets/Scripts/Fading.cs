@@ -1,5 +1,6 @@
-﻿    using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class Fading : MonoBehaviour {
 
@@ -31,7 +32,6 @@ public class Fading : MonoBehaviour {
     }
 
     // OnLevelWasLoaded는 씬이 로드될때마다 호출되며, 
-
     void OnLevelWasLoaded()
     {
         BeginFade(-1);

@@ -4,6 +4,7 @@ using UnityEngine.UI;
 
 public class PlayManager : MonoBehaviour {
 	private static PlayManager instance = null; //for singleton design
+
     public GameManager gameManager;
     public Pikachu pikachu;
     public GameObject ball;
@@ -12,16 +13,19 @@ public class PlayManager : MonoBehaviour {
 	public GameObject player2;
     
 	private static playState playState;
-	private static int score1;
-	private static int score2;
+	private int score1;
+	private int score2;
     public Image Score1Image;
     public Image Score2Image;
     public Image GameSetImage;
 
     public static Sprite[] scoreImageList = new Sprite[16]; // 점수 스프라이트를 불러오기 위한 배열
+    
 
-    //mapinfo에 topnetWidth추가 (배열 크기 1증가) 엣지콜라이더 리스트 추가 _ 병희(1012)
-    public static float[] mapInfo = new float[6] { 20f, 7f, 0.2f, 2f, 0.4f, 0.2f }; //0: map width, 1: map height, 2: net width, 3: net height, 4:topnet width 5: topnet height
+    /// <summary>
+    ///  //0: map width, 1: map height, 2: net width, 3: net height, 4:topnet width 5: topnet height
+    /// </summary>
+    public static float[] mapInfo = new float[6] { 20f, 8f, 0.2f, 2f, 0.4f, 0.2f };
     public EdgeCollider2D[] WallNNet = null; // 0: Top, 1: Bottom, 2:Left, 3:Right, 4:Net
 
     public static float ballRadius = 0.5f;
@@ -30,34 +34,50 @@ public class PlayManager : MonoBehaviour {
 
 
 	/***** Getters and Setters *****/
-	public static int Score1 {
+    public static PlayManager Instance
+    {
+        get
+        {
+            return instance;
+        }
+    }
+
+	public int Score1 {
 		get {
 			return score1;
 		}
 		set {
 			score1 = value;
-		}
+            UpdateScore();
+            StartCoroutine("ResetPlayScene1");
+            Ball.velocity = new Vector3(0, 0.1f, 0);
+            Ball.minSpeed = 12f;
+        }
 	}
 
-	public static int Score2 {
+	public int Score2 {
 		get {
 			return score2;
 		}
 		set {
 			score2 = value;
-		}
+            UpdateScore();
+            StartCoroutine("ResetPlayScene2");
+            Ball.velocity = new Vector3(0, 0.1f, 0);
+            Ball.minSpeed = 12f;
+        }
 	}
 
 	/***** MonoBehaviour *****/
 	void Awake() { //for singleton design
 		if (instance == null)
 			instance = this;
-		else
-			Destroy (this);
+        else
+        	Destroy (this);
 
-        DontDestroyOnLoad(Score1Image);
-        DontDestroyOnLoad(Score2Image);
-
+        //의미가 없는데? 딱히 쓸 이유가 없음.
+        //DontDestroyOnLoad(Score1Image);
+        //DontDestroyOnLoad(Score2Image);
     }
 
 	void Start() {
@@ -81,7 +101,6 @@ public class PlayManager : MonoBehaviour {
         for (int i = 0; i < 16; i++)
         {
             scoreImageList[i] = Resources.Load<Sprite>("Score/ScoreNumbers_" + i);
-
         }
         Score1Image.sprite = scoreImageList[score1];
         Score2Image.sprite = scoreImageList[score2];
@@ -92,34 +111,11 @@ public class PlayManager : MonoBehaviour {
 
     void Update()
     {
-
-        if (Input.GetKeyDown(KeyCode.Y))
-        {
-            StartCoroutine("ResetPlayScene1");
-        }
-
-        if (Input.GetKeyDown(KeyCode.U))
-        {
-            StartCoroutine("ResetPlayScene2");
-        }
-
-        if (Input.GetKeyDown(KeyCode.H))
-        {
-            score1++;
-            UpdateScore();
-            print("1p scoreup");
-        }
-        
-        if(Input.GetKeyDown(KeyCode.J))
-        {
-            score2++;
-            UpdateScore();
-            print("2p scoreup");
-        }
-
+        DebugCheck();
         GameSet();
     }
 
+    /***** Method and Variables *****/
     void UpdateScore()
     {
         Score1Image.sprite = scoreImageList[score1];
@@ -143,7 +139,37 @@ public class PlayManager : MonoBehaviour {
         }
     }
 
-    // 플레이 매니저에서 2D콜라이더 생성, GameManager에서 생성해도 상관없음 (병희 10.12)
+    /// <summary>
+    /// Debug용 함수 씬 리로드, 점수 증가
+    /// </summary>
+    private void DebugCheck()
+    {
+        if (Input.GetKeyDown(KeyCode.Y))
+        {
+            StartCoroutine("ResetPlayScene1");
+        }
+
+        if (Input.GetKeyDown(KeyCode.U))
+        {
+            StartCoroutine("ResetPlayScene2");
+        }
+
+        if (Input.GetKeyDown(KeyCode.H))
+        {
+            score1++;
+            UpdateScore();
+            print("1p scoreup");
+        }
+
+        if (Input.GetKeyDown(KeyCode.J))
+        {
+            score2++;
+            UpdateScore();
+            print("2p scoreup");
+        }
+    }
+
+    // 맵에 2D콜라이더 생성
     void GenerateScene() 
     {
         //Generate Collider without Pikachu
@@ -195,6 +221,30 @@ public class PlayManager : MonoBehaviour {
 
     }
 
+    IEnumerator ResetPlayScene(int winner)
+    {
+        switch (winner)
+        {
+            case 1:
+                ResetBall(1);
+                ResetPlayer();
+                float fadetime = GameObject.Find("FadeControl").GetComponent<Fading>().BeginFade(1);
+                yield return new WaitForSeconds(fadetime);
+                float fadetime2 = GameObject.Find("FadeControl").GetComponent<Fading>().BeginFade(-1);
+                yield return new WaitForSeconds(fadetime2/2);
+                break;
+            case 2:
+                ResetBall(2);
+                ResetPlayer();
+                float fadetime3 = GameObject.Find("FadeControl").GetComponent<Fading>().BeginFade(1);
+                yield return new WaitForSeconds(fadetime3);
+                float fadetime4 = GameObject.Find("FadeControl").GetComponent<Fading>().BeginFade(-1);
+                yield return new WaitForSeconds(fadetime4/2);
+                break;
+        }
+
+    }
+
     IEnumerator ResetPlayScene1()
     {
         float fadetime = GameObject.Find("FadeControl").GetComponent<Fading>().BeginFade(1);
@@ -214,7 +264,6 @@ public class PlayManager : MonoBehaviour {
         ResetBall(2);
         float fadetime2 = GameObject.Find("FadeControl").GetComponent<Fading>().BeginFade(-1);
         yield return new WaitForSeconds(fadetime2);
-        
     }
 
     IEnumerator Wait()
@@ -234,7 +283,6 @@ public class PlayManager : MonoBehaviour {
     {
         player1.transform.position = new Vector3(-0.4f * mapInfo[0], 0.01f * mapInfo[1], 0); // 
         player2.transform.position = new Vector3(0.4f * mapInfo[0], 0.01f * mapInfo[1], 0);  // position.x 값은 0.35~0.4 * mapInfo[0] 정도로 할것
-
     }
 
     public void ResetBall(int winner)
