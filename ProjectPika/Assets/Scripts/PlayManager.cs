@@ -19,10 +19,12 @@ public class PlayManager : MonoBehaviour {
     public Image GameSetImage;
 
     public static Sprite[] scoreImageList = new Sprite[16]; // 점수 스프라이트를 불러오기 위한 배열
-    
 
-    public static float[] mapInfo = new float[5]{20f, 5f, 0.2f, 2f, 0.2f}; //0: map width, 1: map height, 2: net width, 3: net height, 4: topnet height
-	public static float ballRadius = 0.5f;
+    //mapinfo에 topnetWidth추가 (배열 크기 1증가) 엣지콜라이더 리스트 추가 _ 병희(1012)
+    public static float[] mapInfo = new float[6] { 20f, 7f, 0.2f, 2f, 0.4f, 0.2f }; //0: map width, 1: map height, 2: net width, 3: net height, 4:topnet width 5: topnet height
+    public EdgeCollider2D[] WallNNet = null; // 0: Top, 1: Bottom, 2:Left, 3:Right, 4:Net
+
+    public static float ballRadius = 0.5f;
 	public static float pikaBelly = 0.5f;
 	public static float pikaBot = 0.5f;
 
@@ -61,6 +63,8 @@ public class PlayManager : MonoBehaviour {
 	void Start() {
 		player1.AddComponent<Pikachu> ().PlayerNum = 1; //adding scripts to both players
 		player2.AddComponent<Pikachu> ().PlayerNum = 2;
+
+        GenerateScene(); // 맵 콜라이더 생성 _ 병희(1012)
 
 		score1 = 0;
 		score2 = 0;
@@ -134,14 +138,63 @@ public class PlayManager : MonoBehaviour {
                 player1.GetComponent<Pikachu>().enabled = false; // 
                 player2.GetComponent<Pikachu>().enabled = false; //1P와 2P 의 피카츄 움직임 스크립트 Disable
             }
-
-
-            StartCoroutine("Wait");
             
+            StartCoroutine("Wait");
         }
-        
     }
-    
+
+    // 플레이 매니저에서 2D콜라이더 생성, GameManager에서 생성해도 상관없음 (병희 10.12)
+    void GenerateScene() 
+    {
+        //Generate Collider without Pikachu
+        Vector2[] pointsVar = new Vector2[12];
+        pointsVar[0] = new Vector2(-mapInfo[0] / 2f, mapInfo[1]);
+        pointsVar[1] = new Vector2(-mapInfo[0] / 2, 0);
+        pointsVar[2] = new Vector2(-mapInfo[2] / 2, 0);
+        pointsVar[3] = new Vector2(-mapInfo[2] / 2, mapInfo[3]);
+        pointsVar[4] = new Vector2(-mapInfo[4] / 2, mapInfo[3]);
+        pointsVar[5] = new Vector2(-mapInfo[4] / 2, mapInfo[3] + mapInfo[5]);
+        pointsVar[6] = new Vector2(mapInfo[4] / 2, mapInfo[3] + mapInfo[5]);
+        pointsVar[1] = new Vector2(-mapInfo[0] / 2, 0);
+        pointsVar[7] = new Vector2(mapInfo[4] / 2, mapInfo[3]);
+        pointsVar[8] = new Vector2(mapInfo[2] / 2, mapInfo[3]);
+        pointsVar[9] = new Vector2(mapInfo[2] / 2, 0);
+        pointsVar[10] = new Vector2(mapInfo[0] / 2, 0);
+        pointsVar[11] = new Vector2(mapInfo[0] / 2, mapInfo[1]);
+
+        Vector2[] top = new Vector2[2];
+        top[0] = new Vector2(-mapInfo[0] / 2f, mapInfo[1]);
+        top[1] = new Vector2(mapInfo[0] / 2f, mapInfo[1]);
+        WallNNet[0].points = top;
+
+        Vector2[] bottom = new Vector2[2];
+        bottom[0] = new Vector2(-mapInfo[0] / 2f, 0);
+        bottom[1] = new Vector2(mapInfo[0] / 2f, 0);
+        WallNNet[1].points = bottom;
+
+        Vector2[] left = new Vector2[2];
+        left[0] = new Vector2(-mapInfo[0] / 2f, mapInfo[1]);
+        left[1] = new Vector2(-mapInfo[0] / 2f, 0);
+        WallNNet[2].points = left;
+
+        Vector2[] right = new Vector2[2];
+        right[0] = new Vector2(mapInfo[0] / 2f, mapInfo[1]);
+        right[1] = new Vector2(mapInfo[0] / 2f, 0);
+        WallNNet[3].points = right;
+
+        Vector2[] net = new Vector2[8];
+        net[0] = new Vector2(-mapInfo[2] / 2, 0);
+        net[1] = new Vector2(-mapInfo[2] / 2, mapInfo[3]);
+        net[2] = new Vector2(-mapInfo[4] / 2, mapInfo[3]);
+        net[3] = new Vector2(-mapInfo[4] / 2, mapInfo[3] + mapInfo[5]);
+        net[4] = new Vector2(mapInfo[4] / 2, mapInfo[3] + mapInfo[5]);
+        net[5] = new Vector2(mapInfo[4] / 2, mapInfo[3]);
+        net[6] = new Vector2(mapInfo[2] / 2, mapInfo[3]);
+        net[7] = new Vector2(mapInfo[2] / 2, 0);
+        WallNNet[4].points = net;
+
+    }
+
     IEnumerator ResetPlayScene1()
     {
         float fadetime = GameObject.Find("FadeControl").GetComponent<Fading>().BeginFade(1);

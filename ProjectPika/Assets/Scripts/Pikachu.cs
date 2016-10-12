@@ -51,7 +51,7 @@ public class Pikachu : MonoBehaviour {
 	void Start () {
 		PlayerState = pikachuState.AirDrop; //first drop at game start
 		hitState = pikachuHitState.Normal;
-
+        
 		switch (playerNum) {
 		case 1:
 			keys.Add ("UP", KeyCode.W);
