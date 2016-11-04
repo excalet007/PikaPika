@@ -143,7 +143,7 @@ public class Ball : MonoBehaviour
         if (wallHit.collider.CompareTag("player1") == true)
         {
             Debug.Log("It Activates!");
-            
+
             float pika1TempX = pika1Velocity.x;
             float pika1TempY = pika1Velocity.y;
 

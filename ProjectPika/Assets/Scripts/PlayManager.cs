@@ -17,6 +17,9 @@ public class PlayManager : MonoBehaviour {
     public Image Score1Image;
     public Image Score2Image;
     public Image GameSetImage;
+    public Image ReadyImage;
+
+    public float readyCounter; // Ready? 메세지 표시를 조절하기 위한 변수
 
     public static Sprite[] scoreImageList = new Sprite[16]; // 점수 스프라이트를 불러오기 위한 배열
 
@@ -61,6 +64,7 @@ public class PlayManager : MonoBehaviour {
     }
 
 	void Start() {
+        
 		player1.AddComponent<Pikachu> ().PlayerNum = 1; //adding scripts to both players
 		player2.AddComponent<Pikachu> ().PlayerNum = 2;
 
@@ -72,6 +76,7 @@ public class PlayManager : MonoBehaviour {
         Score1Image = GameObject.Find("Score1").GetComponent<Image>();
         Score2Image = GameObject.Find("Score2").GetComponent<Image>();
         GameSetImage = GameObject.Find("GameSet").GetComponent<Image>();
+        ReadyImage = GameObject.Find("Ready?").GetComponent<Image>();
 
         ball.transform.position = new Vector3(-0.4f * mapInfo[0], 0.8f * mapInfo[1], 0);
 
@@ -88,11 +93,14 @@ public class PlayManager : MonoBehaviour {
 
         GameSetImage.sprite = Resources.Load<Sprite>("게임화면_GameSet");
         GameSetImage.transform.gameObject.SetActive(false);
+
+        ReadyImage.sprite = Resources.Load<Sprite>("게임화면_Ready");
+        ReadyImage.transform.gameObject.SetActive(true);
     }
 
     void Update()
     {
-
+        CallReady();
         if (Input.GetKeyDown(KeyCode.Y))
         {
             StartCoroutine("ResetPlayScene1");
@@ -115,6 +123,11 @@ public class PlayManager : MonoBehaviour {
             score2++;
             UpdateScore();
             print("2p scoreup");
+        }
+
+        if(Input.GetKeyDown(KeyCode.V))
+        {
+            readyCounter = 0f;
         }
 
         GameSet();
@@ -203,6 +216,7 @@ public class PlayManager : MonoBehaviour {
         ResetBall(1);
         float fadetime2 = GameObject.Find("FadeControl").GetComponent<Fading>().BeginFade(-1);
         yield return new WaitForSeconds(fadetime2);
+        readyCounter = 0f;
         
     }
 
@@ -214,6 +228,7 @@ public class PlayManager : MonoBehaviour {
         ResetBall(2);
         float fadetime2 = GameObject.Find("FadeControl").GetComponent<Fading>().BeginFade(-1);
         yield return new WaitForSeconds(fadetime2);
+        readyCounter = 0f;
         
     }
 
@@ -229,6 +244,34 @@ public class PlayManager : MonoBehaviour {
         }
         gameManager.EndGame();
     }
+
+    void CallReady()
+    {
+
+        
+        if (readyCounter >= 0f && readyCounter < 3.5f)
+            {
+            readyCounter += Time.deltaTime;
+            ReadyImage.transform.gameObject.SetActive(true);
+                Debug.Log(readyCounter);
+            }
+            if (readyCounter >= 1f)
+            {
+            ReadyImage.transform.gameObject.SetActive(false);
+            }
+            if (readyCounter >= 2f)
+            {
+            ReadyImage.transform.gameObject.SetActive(true);
+            }
+            if (readyCounter >= 3f)
+            {
+            ReadyImage.transform.gameObject.SetActive(false);
+        }
+        
+
+        
+    }
+
 
     public void ResetPlayer()
     {
