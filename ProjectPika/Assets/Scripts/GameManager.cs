@@ -16,20 +16,9 @@ public class GameManager : MonoBehaviour {
         SceneManager.LoadScene(1);
     }
 
-    public void LoadIntro()
-    {
-
-    }
-
-    public void ResetPlay()
-    {
-        
-    }
-
     public void EndGame()
     {
         SceneManager.LoadScene(0);
-
     }
     
 }

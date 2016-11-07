@@ -13,7 +13,7 @@ public class Fading : MonoBehaviour {
 
     void OnGUI()
     {
-        alpha += fadeDir * fadeSpeed * Time.deltaTime;
+        alpha += fadeDir * fadeSpeed * Time.fixedDeltaTime;
 
         alpha = Mathf.Clamp01(alpha); // alpha값이 0과 1 사이를 벗어나지 못하도록 설정
 

@@ -21,7 +21,6 @@ public class PlayManager : MonoBehaviour {
 
     public static Sprite[] scoreImageList = new Sprite[16]; // 점수 스프라이트를 불러오기 위한 배열
     
-
     /// <summary>
     ///  //0: map width, 1: map height, 2: net width, 3: net height, 4:topnet width 5: topnet height
     /// </summary>
@@ -50,8 +49,7 @@ public class PlayManager : MonoBehaviour {
 			score1 = value;
             UpdateScore();
             StartCoroutine("ResetPlayScene1");
-            Ball.velocity = new Vector3(0, 0.1f, 0);
-            Ball.minSpeed = 12f;
+            Ball.ballVelocity= new Vector3(0, 0.1f, 0);
         }
 	}
 
@@ -63,8 +61,7 @@ public class PlayManager : MonoBehaviour {
 			score2 = value;
             UpdateScore();
             StartCoroutine("ResetPlayScene2");
-            Ball.velocity = new Vector3(0, 0.1f, 0);
-            Ball.minSpeed = 12f;
+            Ball.ballVelocity = new Vector3(0, 0.1f, 0);
         }
 	}
 
@@ -221,30 +218,6 @@ public class PlayManager : MonoBehaviour {
 
     }
 
-    IEnumerator ResetPlayScene(int winner)
-    {
-        switch (winner)
-        {
-            case 1:
-                ResetBall(1);
-                ResetPlayer();
-                float fadetime = GameObject.Find("FadeControl").GetComponent<Fading>().BeginFade(1);
-                yield return new WaitForSeconds(fadetime);
-                float fadetime2 = GameObject.Find("FadeControl").GetComponent<Fading>().BeginFade(-1);
-                yield return new WaitForSeconds(fadetime2/2);
-                break;
-            case 2:
-                ResetBall(2);
-                ResetPlayer();
-                float fadetime3 = GameObject.Find("FadeControl").GetComponent<Fading>().BeginFade(1);
-                yield return new WaitForSeconds(fadetime3);
-                float fadetime4 = GameObject.Find("FadeControl").GetComponent<Fading>().BeginFade(-1);
-                yield return new WaitForSeconds(fadetime4/2);
-                break;
-        }
-
-    }
-
     IEnumerator ResetPlayScene1()
     {
         float fadetime = GameObject.Find("FadeControl").GetComponent<Fading>().BeginFade(1);
@@ -273,7 +246,7 @@ public class PlayManager : MonoBehaviour {
         
         while (counter < waitTime)
         {
-            counter += Time.deltaTime;
+            counter += Time.fixedDeltaTime;
             yield return null; //Don't freeze Unity
         }
         gameManager.EndGame();

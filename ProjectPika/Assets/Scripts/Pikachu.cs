@@ -1,22 +1,27 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 public class Pikachu : MonoBehaviour {
-    
 
-	public float offset = 0.01f;
-	public Vector3 gravity = new Vector3(0f, 1f, 0f);
-	public Vector3 jump = new Vector3(0f, 0.35f, 0f);
-	public Vector3 right = new Vector3(4f, 0f, 0f);
+    public Image[] walking;
+    public Image[] jumping;
+    public Image[] sliding;
 
-	private int playerNum;
+    private int playerNum;
 	private pikachuState playerState;
 	private pikachuHitState hitState;
 	private Dictionary<string, KeyCode> keys = new Dictionary<string, KeyCode> ();
+
 	private Vector3 pikaVelocity = new Vector3 ();
 	private Vector3 motionEnergy = new Vector3(); //the current motion energy(jumps, gravity)
-	private Move move; //delegate function to choose player1/player2
+    private Vector3 slideEnergy = new Vector3(); //the current slide energy(jumps * n, gravity * n, right * n)
+    public Vector3 gravity = new Vector3(0f, 1f, 0f);
+    public Vector3 jump = new Vector3(0f, 0.35f, 0f);
+    public Vector3 right = new Vector3(6f, 0f, 0f);
+
+    private Move move; //delegate function to choose player1/player2
 	private bool smashCounter = false; //used to limit smash time, true:smash cooldown
 
 	/***** Getters and Setters *****/
@@ -32,7 +37,15 @@ public class Pikachu : MonoBehaviour {
 		}
 	}
 
-	public int PlayerNum {
+    public pikachuHitState HitState
+    {
+        get
+        {
+            return hitState;
+        }
+    }
+
+    public int PlayerNum {
 		get {
 			return playerNum;
 		}
@@ -74,18 +87,34 @@ public class Pikachu : MonoBehaviour {
 		}
 	}
 
-	void Update () {
+	void FixedUpdate () {
 		CheckGround();
 		move();
 	}
+
+    void Update()
+    {
+
+    }
 
 	/***** Methods *****/
 	delegate void Move();
 	delegate void HitBall();
 
-	//checks if player position is touching ground and resets smachCounter
-	void CheckGround() {
-		if (transform.position.y - PlayManager.pikaBot + motionEnergy.y * Time.deltaTime < 0f + offset) {
+    private void PikaMotion()
+    {
+
+    }
+
+    //checks if player position is touching ground and resets smachCounter
+    public float offset = 0.01f;
+
+    void CheckGround() {
+        // 상대좌표만 쓴게 아니라 모션 에너지까지 쓴 이유는?
+        //if (transform.position.y - PlayManager.pikaBot + motionEnergy.y * Time.fixedDeltaTime < 0f + offset) {
+        if (transform.position.y - PlayManager.pikaBot  < 0f + offset)
+        {
+            print("땅이에욧");
 			PlayerState = pikachuState.Ground;
 			if(hitState == pikachuHitState.Normal)
 				smashCounter = false; //cooldown over
@@ -93,33 +122,82 @@ public class Pikachu : MonoBehaviour {
 		}
 	}
 
-	//move controls for player1
-	private void Move_1p() {
-		pikaVelocity = new Vector3 (); //amount of next frame position change
-		if (Input.anyKey) { //move when input is given
-			if (Input.GetKey (keys ["UP"]) && playerState == pikachuState.Ground) {
-				PlayerState = pikachuState.Jump;
-			}
-			if (Input.GetKey (keys ["LEFT"])) {
-				pikaVelocity -= right * Time.deltaTime;
-				//if player goes beyond boundary, return fixed vector and reset dir
-				if (transform.position.x - PlayManager.pikaBelly + pikaVelocity.x < -PlayManager.mapInfo [0]/ 2) { 
-					//transform.position = new Vector3 (-PlayManager.mapInfo [0] / 2 + PlayManager.pikaBelly, transform.position.y, transform.position.z);
-					pikaVelocity = new Vector3();
-				}
-			}
-			if (Input.GetKey (keys ["RIGHT"])) {
-				pikaVelocity += right * Time.deltaTime;
-				//if player goes beyond boundary, return fixed vector and reset dir
-				if (transform.position.x + PlayManager.pikaBelly + pikaVelocity.x > -PlayManager.mapInfo [2] / 2) {
-					//transform.position = new Vector3 (-PlayManager.mapInfo [2] / 2 - PlayManager.pikaBelly, transform.position.y, transform.position.z);
-					pikaVelocity = new Vector3();
-				}
-			}
-		}
-		switch (playerState) {
+    //move controls for player1
+
+    public Quaternion pikaRotation;
+
+    private void Move_1p() {
+        // FSM 에 따르면 선상태 구분후 입력판단이 좋다고 합니다. 
+        //1. 이 게임의 경우 상태는 한정되어있지만 입력방식은 다양하게 할 수도 있으므로.
+        pikaVelocity = new Vector3 (); //amount of next frame position change
+
+        if (playerState == pikachuState.Ground)
+        {
+            if (Input.GetKey(keys["UP"]))
+                PlayerState = pikachuState.Jump;
+
+            if (Input.GetKey(keys["LEFT"]) == true && Input.GetKey(keys["SMASH"]) == true)
+            {
+                print("좌슬라이드 시작!");
+                motionEnergy += jump;
+                pikaVelocity += motionEnergy;
+                //transform.position += pikaVelocity*0.5f;
+                playerState = pikachuState.Receive_Left;
+            }
+
+            if (Input.GetKey(keys["RIGHT"]) == true && Input.GetKey(keys["SMASH"]) == true)
+            {
+                print("우슬라이드 시작!");
+                motionEnergy += jump;
+                pikaVelocity += motionEnergy;
+                //transform.position += pikaVelocity*0.5f;
+                playerState = pikachuState.Receive_Right;
+            }
+        }
+
+        if (playerState == pikachuState.Ground || playerState == pikachuState.Jump || playerState == pikachuState.AirDrop)
+        {
+            if (Input.GetKey(keys["LEFT"]))
+            {
+                pikaVelocity -= right * Time.fixedDeltaTime;
+                 if (transform.position.x - PlayManager.pikaBelly + pikaVelocity.x < -PlayManager.mapInfo[0] / 2)
+                {
+                    pikaVelocity = new Vector3();
+                }
+            }
+            if (Input.GetKey(keys["RIGHT"]))
+            {
+                pikaVelocity += right * Time.fixedDeltaTime;
+                if (transform.position.x + PlayManager.pikaBelly + pikaVelocity.x > -PlayManager.mapInfo[2] / 2)
+                {
+                    pikaVelocity = new Vector3();
+                }
+            }
+        }
+        //if (Input.anyKey) { //move when input is given
+        //	if (Input.GetKey (keys ["UP"]) && playerState == pikachuState.Ground) {
+        //		PlayerState = pikachuState.Jump;
+        //	}
+        //	if (Input.GetKey (keys ["LEFT"])) {
+        //		pikaVelocity -= right * Time.fixedDeltaTime;
+        //		if player goes beyond boundary, return fixed vector and reset dir
+        //		if (transform.position.x - PlayManager.pikaBelly + pikaVelocity.x < -PlayManager.mapInfo [0]/ 2) { 
+        //			transform.position = new Vector3 (-PlayManager.mapInfo [0] / 2 + PlayManager.pikaBelly, transform.position.y, transform.position.z);
+        //			pikaVelocity = new Vector3();
+        //		}
+        //	}
+        //	if (Input.GetKey (keys ["RIGHT"])) {
+        //		pikaVelocity += right * Time.fixedDeltaTime;
+        //		if (transform.position.x + PlayManager.pikaBelly + pikaVelocity.x > -PlayManager.mapInfo [2] / 2) {
+        //			pikaVelocity = new Vector3();
+        //		}
+        //	}
+        //}
+        switch (playerState) {
 		case pikachuState.Ground:
-			transform.position += pikaVelocity;
+                pikaRotation.eulerAngles = new Vector3(0, 0, 0);
+                this.transform.rotation = pikaRotation;
+                transform.position += pikaVelocity;
 			break;
 		case pikachuState.Jump:
 			motionEnergy += jump;
@@ -128,10 +206,27 @@ public class Pikachu : MonoBehaviour {
 			PlayerState = pikachuState.AirDrop;
 			break;
 		case pikachuState.AirDrop:
-			motionEnergy -= gravity * Time.deltaTime;
+			motionEnergy -= gravity * Time.fixedDeltaTime;
 			pikaVelocity += motionEnergy;
 			transform.position += pikaVelocity;
 			break;
+        case pikachuState.Receive_Left:
+                pikaRotation.eulerAngles = new Vector3(0, 180, 0);
+                this.transform.rotation = pikaRotation;
+                pikaVelocity += (- gravity*Time.fixedDeltaTime + -1.5f*right*Time.fixedDeltaTime);
+                transform.position += pikaVelocity;
+                print("좌측 리시브 작동");
+            break;
+        case pikachuState.Receive_Right:
+            print("우측 리시브 작동");
+                pikaRotation.eulerAngles = new Vector3(0, 0, 0);
+                pikaVelocity += (-gravity * Time.fixedDeltaTime + 1.5f*right * Time.fixedDeltaTime);
+                transform.position += pikaVelocity;
+                this.transform.rotation = pikaRotation;
+                break;
+        case pikachuState.GameOver:
+            print ("게임오버!");
+            break;                
 		}
 	}
 
@@ -143,7 +238,7 @@ public class Pikachu : MonoBehaviour {
 				PlayerState = pikachuState.Jump;
 			}
 			if (Input.GetKey (keys ["LEFT"])) {
-				pikaVelocity -= right * Time.deltaTime;
+				pikaVelocity -= right * Time.fixedDeltaTime;
 				//if player goes beyond boundary, return fixed vector and reset dir
 				if (transform.position.x - PlayManager.pikaBelly + pikaVelocity.x < PlayManager.mapInfo [2] / 2) {
 					//transform.position = new Vector3 (PlayManager.mapInfo [2] / 2 + PlayManager.pikaBelly, transform.position.y, transform.position.z);
@@ -151,7 +246,7 @@ public class Pikachu : MonoBehaviour {
 				}
 			}
 			if (Input.GetKey (keys ["RIGHT"])) {
-				pikaVelocity += right * Time.deltaTime;
+				pikaVelocity += right * Time.fixedDeltaTime;
 				//if player goes beyond boundary, return fixed vector and reset dir
 				if (transform.position.x + PlayManager.pikaBelly + pikaVelocity.x > PlayManager.mapInfo [0] / 2) {
 					//transform.position = new Vector3 (PlayManager.mapInfo [0] / 2 - PlayManager.pikaBelly, transform.position.y, transform.position.z);
@@ -167,11 +262,10 @@ public class Pikachu : MonoBehaviour {
 			motionEnergy += jump;
 			pikaVelocity += motionEnergy;
 			transform.position += pikaVelocity;
-			Debug.Log ("accel:" + motionEnergy);
 			PlayerState = pikachuState.AirDrop;
 			break;
 		case pikachuState.AirDrop:
-			motionEnergy -= gravity * Time.deltaTime;
+			motionEnergy -= gravity * Time.fixedDeltaTime;
 			pikaVelocity += motionEnergy;
 			transform.position += pikaVelocity;
 			break;
@@ -212,7 +306,7 @@ public class Pikachu : MonoBehaviour {
 				PlayerState = pikachuState.Receive_Right;
 			Debug.Log("1p state:"+playerState+"counter"+smashCounter);
 		}
-		Invoke ("ReturnNormalHitState", 0.5f);
+		Invoke ("ReturnNormalHitState", 0.3f);
 	}
 
 	//smash controls for player 2
@@ -243,6 +337,6 @@ public class Pikachu : MonoBehaviour {
 			if (Input.GetKey (keys ["RIGHT"]))
 				PlayerState = pikachuState.Receive_Right;
 		}
-		Invoke ("ReturnNormalHitState", 0.5f);
+		Invoke ("ReturnNormalHitState", 0.3f);
 	}
 }
