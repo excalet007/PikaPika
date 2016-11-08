@@ -309,10 +309,10 @@ public class Ball : MonoBehaviour
             this.transform.position += pika1TempVelocity * Time.fixedDeltaTime;
         }
 
-        if (wallHit.collider.CompareTag("player2") == true)
-        {
-            float pika2TempX = pika2Velocity.x;
-            float pika2TempY = pika2Velocity.y;
+            if (hitCollider.collider.CompareTag("player2") == true)
+            {
+                float pika2TempX = pika2Velocity.x;
+                float pika2TempY = pika2Velocity.y;
 
             Vector3 pika2TempVelocity = new Vector3(pika2TempX, pika2TempY, 0);
 
