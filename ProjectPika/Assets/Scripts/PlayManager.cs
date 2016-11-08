@@ -18,6 +18,15 @@ public class PlayManager : MonoBehaviour {
     public Image Score1Image;
     public Image Score2Image;
     public Image GameSetImage;
+    public Image ReadyImage; // public 끌어다 붙일것!!
+
+    public float readyCounter;
+
+    private float originalTimeScale;
+    private float slowTimeScale;
+    private float factor = 2f;
+
+    public bool keyLock;
 
     public static Sprite[] scoreImageList = new Sprite[16]; // 점수 스프라이트를 불러오기 위한 배열
     
@@ -28,8 +37,8 @@ public class PlayManager : MonoBehaviour {
     public EdgeCollider2D[] WallNNet = null; // 0: Top, 1: Bottom, 2:Left, 3:Right, 4:Net
 
     public static float ballRadius = 0.5f;
-	public static float pikaBelly = 0.5f;
-	public static float pikaBot = 0.5f;
+	public static float pikaBelly = 0.7f;
+	public static float pikaHeight = 0.5f;
 
 
 	/***** Getters and Setters *****/
@@ -49,7 +58,6 @@ public class PlayManager : MonoBehaviour {
 			score1 = value;
             UpdateScore();
             StartCoroutine("ResetPlayScene1");
-            Ball.ballVelocity= new Vector3(0, 0.1f, 0);
         }
 	}
 
@@ -61,7 +69,6 @@ public class PlayManager : MonoBehaviour {
 			score2 = value;
             UpdateScore();
             StartCoroutine("ResetPlayScene2");
-            Ball.ballVelocity = new Vector3(0, 0.1f, 0);
         }
 	}
 
@@ -89,6 +96,7 @@ public class PlayManager : MonoBehaviour {
         Score1Image = GameObject.Find("Score1").GetComponent<Image>();
         Score2Image = GameObject.Find("Score2").GetComponent<Image>();
         GameSetImage = GameObject.Find("GameSet").GetComponent<Image>();
+        ReadyImage = GameObject.Find("Ready?").GetComponent<Image>();
 
         ball.transform.position = new Vector3(-0.4f * mapInfo[0], 0.8f * mapInfo[1], 0);
 
@@ -104,6 +112,21 @@ public class PlayManager : MonoBehaviour {
 
         GameSetImage.sprite = Resources.Load<Sprite>("게임화면_GameSet");
         GameSetImage.transform.gameObject.SetActive(false);
+
+        ReadyImage.sprite = Resources.Load<Sprite>("게임화면_Ready");
+        ReadyImage.transform.gameObject.SetActive(true);
+
+        originalTimeScale = Time.timeScale;
+        slowTimeScale = originalTimeScale / factor;
+
+        readyCounter = 0f;
+    }
+    
+    void FixedUpdate()
+    {
+        callReady();
+        testKeys();
+
     }
 
     void Update()
@@ -119,6 +142,44 @@ public class PlayManager : MonoBehaviour {
         Score2Image.sprite = scoreImageList[score2];
     }
 
+    private void testKeys()
+    {
+        if (Input.GetKeyDown(KeyCode.Y))
+        {
+            StartCoroutine("ResetPlayScene1");
+        }
+
+        if (Input.GetKeyDown(KeyCode.U))
+        {
+            StartCoroutine("ResetPlayScene2");
+        }
+
+        if (Input.GetKeyDown(KeyCode.H))
+        {
+            score1++;
+            UpdateScore();
+            print("1p scoreup");
+        }
+
+        if (Input.GetKeyDown(KeyCode.J))
+        {
+            score2++;
+            UpdateScore();
+            print("2p scoreup");
+        }
+    }
+
+    public void slowMotion() // 한 게임이 끝나고 씬이 리셋되기 전에 슬로우모션
+    {
+        GameObject.Find("Player1").GetComponent<Pikachu>().jump.y /= 1.35f;
+        Time.timeScale = slowTimeScale;
+    }
+    public void resetMotion() // 슬로우모션 원상복구
+    {
+        GameObject.Find("Player1").GetComponent<Pikachu>().jump.y = 0.35f;
+        Time.timeScale = originalTimeScale;
+    }
+
     public void GameSet()
     {
         if (score1 == 15 || score2 == 15)
@@ -128,11 +189,47 @@ public class PlayManager : MonoBehaviour {
 
             if (pikachu.PlayerState == pikachuState.Ground)
             {
-                player1.GetComponent<Pikachu>().enabled = false; // 
-                player2.GetComponent<Pikachu>().enabled = false; //1P와 2P 의 피카츄 움직임 스크립트 Disable
+                keyLock = true; // 변경사항
+
+                // 수찬이랑 해서 일단 주석 처리함
+                //player1.GetComponent<Pikachu>().enabled = false; // 
+                //player2.GetComponent<Pikachu>().enabled = false; //1P와 2P 의 피카츄 움직임 스크립트 Disable
             }
             
             StartCoroutine("Wait");
+        }
+    }
+
+    void callReady() // Ready? 메세지를 깜빡이게 하고, 메세지가 출력되는 동안 키 입력을 받지 않도록 함
+    {
+        keyLock = true;
+        if (readyCounter >= 0f && readyCounter < 3.5f)
+        {
+            readyCounter += Time.deltaTime;
+            ReadyImage.transform.gameObject.SetActive(true);
+            Debug.Log(readyCounter);
+
+            // ballVelocity = 0;
+            // gravity = 0;
+
+        }
+
+        if (readyCounter >= 1f)
+        {
+            ReadyImage.transform.gameObject.SetActive(false);
+        }
+
+        if (readyCounter >= 2f)
+        {
+            ReadyImage.transform.gameObject.SetActive(true);
+        }
+
+        if (readyCounter >= 3f)
+        {
+            ReadyImage.transform.gameObject.SetActive(false);
+            keyLock = false;
+
+            // 여기서부터 그라비티만 제대로 적용
         }
     }
 
@@ -218,25 +315,34 @@ public class PlayManager : MonoBehaviour {
 
     }
 
-    IEnumerator ResetPlayScene1()
+    IEnumerator ResetPlayScene1() // 1P 서브로 시작하도록 씬을 리셋
     {
+        slowMotion();
         float fadetime = GameObject.Find("FadeControl").GetComponent<Fading>().BeginFade(1);
         yield return new WaitForSeconds(fadetime);
         ResetPlayer();
         ResetBall(1);
+        resetMotion();
+        readyCounter = 0f;
         float fadetime2 = GameObject.Find("FadeControl").GetComponent<Fading>().BeginFade(-1);
         yield return new WaitForSeconds(fadetime2);
-        
+        callReady();
+
     }
 
-    IEnumerator ResetPlayScene2()
+    IEnumerator ResetPlayScene2() // 2P 서브로 시작하도록 씬을 리셋
     {
+        slowMotion();
         float fadetime = GameObject.Find("FadeControl").GetComponent<Fading>().BeginFade(1);
         yield return new WaitForSeconds(fadetime);
         ResetPlayer();
         ResetBall(2);
+        resetMotion();
+        readyCounter = 0f;
         float fadetime2 = GameObject.Find("FadeControl").GetComponent<Fading>().BeginFade(-1);
         yield return new WaitForSeconds(fadetime2);
+        callReady();
+
     }
 
     IEnumerator Wait()
@@ -260,6 +366,8 @@ public class PlayManager : MonoBehaviour {
 
     public void ResetBall(int winner)
     {
+        Ball.ballVelocity = new Vector3(0, 0, 0);
+
         switch (winner)
         {
             case 1:

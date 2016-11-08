@@ -83,9 +83,9 @@ public class Ball : MonoBehaviour
 
     // 3. 속도계산 
     private ballState ballState;
-    public float gravity = -10f;
+    public float gravity = -30f;
     public float reflectionCoefficient = 1.3f;
-    public static float maxSpeed = 25f;
+    public static float maxSpeed = 20f;
     public static float minSpeed = 8f;
     public static Vector3 ballVelocity = new Vector3(0, 0, 0);
 
