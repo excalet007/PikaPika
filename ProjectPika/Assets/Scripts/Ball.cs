@@ -4,7 +4,6 @@ using UnityEngine.SceneManagement;
 
 public class Ball : MonoBehaviour
 {
-
     /***** MonoBehaviour *****/
     void Start()
     {
@@ -71,9 +70,8 @@ public class Ball : MonoBehaviour
         // 피카츄 콜라이더 오프셋
         pika1Velocity = player1.GetComponent<Pikachu>().PikaVelocity;
         pika2Velocity = player2.GetComponent<Pikachu>().PikaVelocity;
-
-        //time.deltatime 생각해보기`
-        player1.GetComponent<PolygonCollider2D>().offset = pika1Velocity;  
+        
+        player1.GetComponent<PolygonCollider2D>().offset = pika1Velocity;
         player2.GetComponent<PolygonCollider2D>().offset = pika2Velocity;
 
         //충돌판정
@@ -83,9 +81,10 @@ public class Ball : MonoBehaviour
 
     // 3. 속도계산 
     private ballState ballState;
-    public float gravity = -30f;
+    public static float gravity = -3f;
     public float reflectionCoefficient = 1.3f;
-    public static float maxSpeed = 20f;
+    public static float smashSpeed = maxSpeed * 2f;
+    public static float maxSpeed = 18f;
     public static float minSpeed = 8f;
     public static Vector3 ballVelocity = new Vector3(0, 0, 0);
 
@@ -305,6 +304,7 @@ public class Ball : MonoBehaviour
                                 
                 Vector3 pika1TempVelocity = new Vector3(pika1TempX, pika1TempY, 0);
                 this.transform.position += pika1TempVelocity*1.5f;
+                print(pika1TempVelocity);
                 //this.transform.position += pika1TempVelocity*-1f;
             }
 

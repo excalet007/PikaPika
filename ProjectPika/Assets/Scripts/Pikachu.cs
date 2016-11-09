@@ -150,7 +150,7 @@ public class Pikachu : MonoBehaviour {
         
         if (this.transform.position.y <= PlayManager.pikaHeight)
         {
-            print("땅이에욧");
+            //print("땅이에욧");
 			PlayerState = pikachuState.Ground;
 			if(hitState == pikachuHitState.Normal)
 				smashCounter = false; //cooldown over
@@ -226,10 +226,10 @@ public class Pikachu : MonoBehaviour {
                 this.transform.rotation = pikaRotation;
                 pikaVelocity += (-2f* gravity*Time.fixedDeltaTime + -1.5f*right*Time.fixedDeltaTime);
                 transform.position += pikaVelocity;
-                print("좌측 리시브 작동");
+                //print("좌측 리시브 작동");
             break;
         case pikachuState.Receive_Right:
-            print("우측 리시브 작동");
+                //print("우측 리시브 작동");
                 pikaRotation.eulerAngles = new Vector3(0, 0, 0);
                 this.transform.rotation = pikaRotation;
                 pikaVelocity += (-2f*gravity * Time.fixedDeltaTime + 1.5f*right * Time.fixedDeltaTime);

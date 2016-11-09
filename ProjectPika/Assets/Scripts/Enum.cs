@@ -8,7 +8,7 @@ public enum playState
 
 public enum ballState
 {
-    Normal, Smash
+    Normal, Smash, SlowSmash
 }
 
 // bounce State 예측을 위한 변경사항
@@ -26,9 +26,12 @@ public enum pikachuState
     Ground, Jump, AirDrop, Receive_Left, Receive_Right, GameOver
 }
 
-public enum pikachuAnimation
+/// <summary>
+///     Stay, Walk, Jump, Receive, Win, Lose
+/// </summary>
+public enum pikachuAnimationState
 {
-    Stay, Walk, Jump, Receive, Win, Lose
+    Stay, Walk, Jump, Receive, Smash, Win, Lose
 }
 
 /// <summary>

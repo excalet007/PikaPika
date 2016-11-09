@@ -131,7 +131,6 @@ public class PlayManager : MonoBehaviour {
 
     void Update()
     {
-        DebugCheck();
         GameSet();
     }
 
@@ -207,10 +206,10 @@ public class PlayManager : MonoBehaviour {
         {
             readyCounter += Time.deltaTime;
             ReadyImage.transform.gameObject.SetActive(true);
-            Debug.Log(readyCounter);
+            //Debug.Log(readyCounter);
 
-            // ballVelocity = 0;
-            // gravity = 0;
+            Ball.ballVelocity = new Vector3(0,0,0);
+            Ball.gravity = 0;
 
         }
 
@@ -228,6 +227,7 @@ public class PlayManager : MonoBehaviour {
         {
             ReadyImage.transform.gameObject.SetActive(false);
             keyLock = false;
+            Ball.gravity = -7f;
 
             // 여기서부터 그라비티만 제대로 적용
         }
