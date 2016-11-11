@@ -19,6 +19,7 @@ public class Pikachu : MonoBehaviour {
 
     private Move move; //delegate function to choose player1/player2
 	private bool smashCounter = false; //used to limit smash time, true:smash cooldown
+	private bool receiveCounter = false;
 
 	/***** Getters and Setters *****/
 	public pikachuState PlayerState {
@@ -131,7 +132,7 @@ public class Pikachu : MonoBehaviour {
 
     }
 
-    //checks if player position is touching ground and resets smachCounter
+    //checks if player position is touching ground and resets smashCounter
     public float offset = 0.01f;
 
     void CheckGround() {
@@ -140,6 +141,7 @@ public class Pikachu : MonoBehaviour {
         {
             //print("땅이에욧");
 			PlayerState = pikachuState.Ground;
+			Invoke ("ResetReceiveCounter", 1f);
 			if(hitState == pikachuHitState.Normal)
 				smashCounter = false; //cooldown over
 			this.transform.position = new Vector3 (transform.position.x, PlayManager.pikaHeight, transform.position.z);
@@ -161,18 +163,18 @@ public class Pikachu : MonoBehaviour {
             if (Input.GetKey(keys["UP"]))
                 PlayerState = pikachuState.Jump;
 
-            if (Input.GetKey(keys["LEFT"]) == true && Input.GetKey(keys["SMASH"]) == true)
+			if (Input.GetKey(keys["LEFT"]) == true && Input.GetKey(keys["SMASH"]) == true && !receiveCounter)
             {
-                print("좌슬라이드 시작!");
+                //print("좌슬라이드 시작!");
                 motionEnergy += 1.5f * jump;
                 pikaVelocity += motionEnergy;
                 //transform.position += pikaVelocity*0.5f;
                 playerState = pikachuState.Receive_Left;
             }
 
-            if (Input.GetKey(keys["RIGHT"]) == true && Input.GetKey(keys["SMASH"]) == true)
+			if (Input.GetKey(keys["RIGHT"]) == true && Input.GetKey(keys["SMASH"]) == true && !receiveCounter)
             {
-                print("우슬라이드 시작!");
+                //print("우슬라이드 시작!");
                 motionEnergy += 1.5f*jump;
                 pikaVelocity += motionEnergy;
                 //transform.position += pikaVelocity*0.5f;
@@ -192,11 +194,12 @@ public class Pikachu : MonoBehaviour {
             }
         }
 
-        switch (playerState) {
+        switch (playerState) 
+		{
 		case pikachuState.Ground:
-                pikaRotation.eulerAngles = new Vector3(0, 0, 0);
-                this.transform.rotation = pikaRotation;
-                transform.position += pikaVelocity;
+            pikaRotation.eulerAngles = new Vector3(0, 0, 0);
+            this.transform.rotation = pikaRotation;
+            transform.position += pikaVelocity;
 			break;
 		case pikachuState.Jump:
 			motionEnergy += jump;
@@ -209,22 +212,24 @@ public class Pikachu : MonoBehaviour {
 			pikaVelocity += motionEnergy;
 			transform.position += pikaVelocity;
 			break;
-        case pikachuState.Receive_Left:
-                pikaRotation.eulerAngles = new Vector3(0, 180, 0);
-                this.transform.rotation = pikaRotation;
-                pikaVelocity += (-2f* gravity*Time.fixedDeltaTime + -1.5f*right*Time.fixedDeltaTime);
-                transform.position += pikaVelocity;
-                //print("좌측 리시브 작동");
+		case pikachuState.Receive_Left:
+			pikaRotation.eulerAngles = new Vector3 (0, 180, 0);
+			this.transform.rotation = pikaRotation;
+			pikaVelocity += (-2f * gravity * Time.fixedDeltaTime + -1.5f * right * Time.fixedDeltaTime);
+			transform.position += pikaVelocity;
+			receiveCounter = true;
+//            print("좌측 리시브 작동");
             break;
-        case pikachuState.Receive_Right:
-                //print("우측 리시브 작동");
-                pikaRotation.eulerAngles = new Vector3(0, 0, 0);
-                this.transform.rotation = pikaRotation;
-                pikaVelocity += (-2f*gravity * Time.fixedDeltaTime + 1.5f*right * Time.fixedDeltaTime);
-                transform.position += pikaVelocity;
-                break;
+		case pikachuState.Receive_Right:
+            //print("우측 리시브 작동");
+			pikaRotation.eulerAngles = new Vector3 (0, 0, 0);
+			this.transform.rotation = pikaRotation;
+			pikaVelocity += (-2f * gravity * Time.fixedDeltaTime + 1.5f * right * Time.fixedDeltaTime);
+			transform.position += pikaVelocity;
+			receiveCounter = true;
+            break;
         case pikachuState.GameOver:
-            print ("게임오버!");
+        	print ("게임오버!");
             break;                
 		}
 	}
@@ -276,8 +281,13 @@ public class Pikachu : MonoBehaviour {
 		hitState = pikachuHitState.Normal;
 	}
 
+	private void ResetReceiveCounter() {
+		receiveCounter = false;
+	}
+
 	//smash controls for player 1
 	private void Smash_1p() {
+//		if (hitState == pikachuHitState.Normal) {
 		if (Input.GetKeyDown (keys ["SMASH"]) && !smashCounter && PlayerState == pikachuState.AirDrop) { //airborn smash
 			if (Input.GetKey (keys ["DOWN"])) {
 				if (Input.GetKey (keys ["RIGHT"]) || Input.GetKey(keys["LEFT"]))
@@ -322,13 +332,16 @@ public class Pikachu : MonoBehaviour {
 				hitState = pikachuHitState.HitSlow;
 			smashCounter = true; //cooldown until lands ground
 			Debug.Log("2p hitstate:"+hitState+"counter"+smashCounter);
+			Invoke ("ReturnNormalHitState", 0.3f);
 		}
+		/*
 		else if (Input.GetKeyDown (keys ["SMASH"]) && !smashCounter && PlayerState == pikachuState.Ground) {
 			if (Input.GetKey (keys ["LEFT"]))
 				PlayerState = pikachuState.Receive_Left;
 			if (Input.GetKey (keys ["RIGHT"]))
 				PlayerState = pikachuState.Receive_Right;
 		}
-		Invoke ("ReturnNormalHitState", 0.3f);
+		*/
+
 	}
 }

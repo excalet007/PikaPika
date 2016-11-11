@@ -147,7 +147,7 @@ public class PikaAnimation : MonoBehaviour {
 
     private void receiveAnimation()
     {
-        if(refPikachuScript.PikaVelocity.y >0)
+        if(refPikachuScript.PikaVelocity.y > 0)
         {
             pikaSprite.sprite = receive[0];
         }
@@ -159,8 +159,7 @@ public class PikaAnimation : MonoBehaviour {
 
     private void smashAnimation()
     {
-        // ? 왜 이건되지?
-        spriteChangeTime = (1 / 1.5f ) / smash.Length;
+        spriteChangeTime = (1f / 1.5f) / smash.Length;
         //print("sprite Change Time in smash is" + spriteChangeTime);
 
         if (spriteNumber >= smash.Length)

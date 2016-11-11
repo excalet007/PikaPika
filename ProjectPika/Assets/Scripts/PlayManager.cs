@@ -112,10 +112,10 @@ public class PlayManager : MonoBehaviour {
         Score1Image.sprite = scoreImageList[score1];
         Score2Image.sprite = scoreImageList[score2];
 
-        GameSetImage.sprite = Resources.Load<Sprite>("게임화면_GameSet");
+        GameSetImage.sprite = Resources.Load<Sprite>("gameset");
         GameSetImage.transform.gameObject.SetActive(false);
 
-        ReadyImage.sprite = Resources.Load<Sprite>("게임화면_Ready");
+        ReadyImage.sprite = Resources.Load<Sprite>("ready");
         ReadyImage.transform.gameObject.SetActive(true);
 
         originalTimeScale = Time.timeScale;
