@@ -3,7 +3,9 @@ using System.Collections;
 using UnityEngine.UI;
 
 public class PlayManager : MonoBehaviour {
-	private static PlayManager instance = null; //for singleton design
+
+    #region Variables
+    private static PlayManager instance = null; //for singleton design
 
     public GameManager gameManager;
     public Pikachu pikachu;
@@ -18,7 +20,7 @@ public class PlayManager : MonoBehaviour {
     public Image Score1Image;
     public Image Score2Image;
     public Image GameSetImage;
-    public Image ReadyImage; // public 끌어다 붙일것!!
+    public Image ReadyImage;
 
     public float readyCounter;
 
@@ -29,7 +31,7 @@ public class PlayManager : MonoBehaviour {
     public bool keyLock;
 
     public static Sprite[] scoreImageList = new Sprite[16]; // 점수 스프라이트를 불러오기 위한 배열
-    
+   
     /// <summary>
     ///  //0: map width, 1: map height, 2: net width, 3: net height, 4:topnet width 5: topnet height
     /// </summary>
@@ -39,9 +41,9 @@ public class PlayManager : MonoBehaviour {
     public static float ballRadius = 0.5f;
 	public static float pikaBelly = 0.7f;
 	public static float pikaHeight = 0.5f;
+    #endregion
 
-
-	/***** Getters and Setters *****/
+    /***** Getters and Setters *****/
     public static PlayManager Instance
     {
         get
@@ -185,14 +187,10 @@ public class PlayManager : MonoBehaviour {
         {
             print("GameSet");
             GameSetImage.transform.gameObject.SetActive(true); // Print Game Set Message
-
+            
             if (pikachu.PlayerState == pikachuState.Ground)
             {
                 keyLock = true; // 변경사항
-
-                // 수찬이랑 해서 일단 주석 처리함
-                //player1.GetComponent<Pikachu>().enabled = false; // 
-                //player2.GetComponent<Pikachu>().enabled = false; //1P와 2P 의 피카츄 움직임 스크립트 Disable
             }
             
             StartCoroutine("Wait");
@@ -228,8 +226,6 @@ public class PlayManager : MonoBehaviour {
             ReadyImage.transform.gameObject.SetActive(false);
             keyLock = false;
             Ball.gravity = -7f;
-
-            // 여기서부터 그라비티만 제대로 적용
         }
     }
 

@@ -61,8 +61,6 @@ public class Pikachu : MonoBehaviour {
 		PlayerState = pikachuState.AirDrop; //first drop at game start
 		hitState = pikachuHitState.Normal;
         
-
-
 		switch (playerNum) {
 		case 1:
 			keys.Add ("UP", KeyCode.W);
@@ -93,21 +91,11 @@ public class Pikachu : MonoBehaviour {
         }
         ErrorCheck();
 	}
-
-    void Update()
-    {
-        DeliveryPikaMotion();
-    }
-
+    
 	/***** Methods *****/
 	delegate void Move();
 	delegate void HitBall();
-
-    private void DeliveryPikaMotion()
-    {
-        
-    }
-
+    
     private void ErrorCheck()
     {
 
@@ -309,15 +297,8 @@ public class Pikachu : MonoBehaviour {
 				hitState = pikachuHitState.HitSlow;
 			smashCounter = true;//cooldown until lands ground
 			Debug.Log("1p hitstate:"+hitState+"counter"+smashCounter);
-		}
-		else if (Input.GetKeyDown (keys ["SMASH"]) && !smashCounter && PlayerState == pikachuState.Ground) {
-			if (Input.GetKey (keys ["LEFT"]))
-				PlayerState = pikachuState.Receive_Left;
-			if (Input.GetKey (keys ["RIGHT"]))
-				PlayerState = pikachuState.Receive_Right;
-			Debug.Log("1p state:"+playerState+"counter"+smashCounter);
-		}
-		Invoke ("ReturnNormalHitState", 0.3f);
+            Invoke("ReturnNormalHitState", 0.3f);
+        }
 	}
 
 	//smash controls for player 2

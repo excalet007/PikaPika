@@ -38,9 +38,9 @@ public class PikaAnimation : MonoBehaviour {
             case pikachuState.Jump:
             case pikachuState.AirDrop:
                 pikaAniState = pikachuAnimationState.Jump;
+                // 점프상태일때 스매쉬 입력버튼 하면 (normal제외하고 모두에 대하여 스매쉬 에니메이션)
                 if (refPikachuScript.HitState != pikachuHitState.Normal)
                 {
-                    print(" 잘 작동되는 뎁쇼?");
                     pikaAniState = pikachuAnimationState.Smash;
                 }
                 break;
@@ -159,7 +159,8 @@ public class PikaAnimation : MonoBehaviour {
 
     private void smashAnimation()
     {
-        spriteChangeTime = (1 / cycleInOneSecond[3]) / smash.Length;
+        // ? 왜 이건되지?
+        spriteChangeTime = (1 / 1.5f ) / smash.Length;
         //print("sprite Change Time in smash is" + spriteChangeTime);
 
         if (spriteNumber >= smash.Length)

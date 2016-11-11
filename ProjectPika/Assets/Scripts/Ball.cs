@@ -41,7 +41,7 @@ public class Ball : MonoBehaviour
 
     /***** Methods and Variables *****/
 
-    // 1. 키콘트롤 & 씬 리셋
+    #region 1.KeyControl & SceneReset
     void KeyControl()
     {
         // R키= 리셋
@@ -54,9 +54,9 @@ public class Ball : MonoBehaviour
     {
         SceneManager.LoadScene("GamePlay");
     }
+    #endregion 
 
-
-    // 2. 충돌계산
+    #region 2.Predict Bounce
     private RaycastHit2D hitCollider;
     private Vector2 distanceVector;
     private float ballRadius = 0.5f;
@@ -77,15 +77,14 @@ public class Ball : MonoBehaviour
         //충돌판정
         hitCollider = Physics2D.CircleCast(this.transform.position, ballRadius, ballVelocity, ballVelocity.magnitude * Time.fixedDeltaTime * 1.1f);
     }
-    
+    #endregion
 
-    // 3. 속도계산 
+    #region 3.Calculate Ball Velocity
     private ballState ballState;
-    public static float gravity = -3f;
-    public float reflectionCoefficient = 1.3f;
-    public static float smashSpeed = maxSpeed * 2f;
-    public static float maxSpeed = 18f;
-    public static float minSpeed = 8f;
+    public static float gravity = -3f; // playmanager 에서 적용됨(사실상 여기 값음 의미없음)
+    public float reflectionCoefficient = 1.5f;
+    public static float maxSpeed = 12f;
+    public static float smashSpeed = maxSpeed * 1.5f;
     public static Vector3 ballVelocity = new Vector3(0, 0, 0);
 
     void CalculateVelocity()
@@ -101,7 +100,7 @@ public class Ball : MonoBehaviour
             
             //3.2.2 스매쉬 상태에서 천장충돌(x값 배수곱셈)
             if (hitCollider.collider.gameObject.CompareTag("top") == true && ballState == ballState.Smash)
-                ballVelocity.x = reflectionCoefficient;
+                ballVelocity.x *= reflectionCoefficient;
 
             //3.2.3 바닥충돌 _ 점수증가
             if (hitCollider.collider.gameObject.CompareTag("bottom") == true)
@@ -117,12 +116,13 @@ public class Ball : MonoBehaviour
                 }
             }
 
+            //3.2.4 피카츄충돌 _ 피카츄 힛스테이스 상태값에 따라사 볼 상태 변화
             if (hitCollider.collider.gameObject.CompareTag("player1") == true)
             {
+                print(hitCollider.collider.gameObject.GetComponent<Pikachu>().HitState);
                 pikachuHitState pika1HitState = hitCollider.collider.gameObject.GetComponent<Pikachu>().HitState;
-                //print("지금 힛스테이트는요... " +pika1HitState.ToString());
-
-                if(ballVelocity.y < 0 && pika1Velocity.y >=0)
+                
+                if (ballVelocity.y < 0 && pika1Velocity.y >=0)
                 {
                     ballVelocity = new Vector3(ballVelocity.x, Mathf.Abs(ballVelocity.y), ballVelocity.z);
                     //print("아래로 꺽이는 것을 방지하였습니다!");
@@ -130,59 +130,56 @@ public class Ball : MonoBehaviour
 
                 switch (pika1HitState)
                 {
-                    case pikachuHitState.HitSlow:
-
-                        ballState = ballState.Smash;
+                    case pikachuHitState.Normal:
+                        print("hit normal is activated");
+                        ballState = ballState.Normal;
                         break;
-                    case pikachuHitState.HitSmash_Down:
 
+                    case pikachuHitState.HitSlow:
+                        print("hit slow is activated");
+                        ballState = ballState.SlowSmash;
+                        break;
+
+                    case pikachuHitState.HitSmash_Down:
+                        print("hit smash_down Activated");
                         ballState = ballState.Smash;
                         ballVelocity = new Vector3((ballVelocity.x / ballVelocity.x) * 0.15f, -1, 0);
-                        ballVelocity = ballVelocity / ballVelocity.magnitude * maxSpeed;
+                        ballVelocity = ballVelocity / ballVelocity.magnitude * smashSpeed;
                         break;
+
                     case pikachuHitState.HitSmash_DownLeft:
-
-                        ballState = ballState.Smash;
-                        ballVelocity = new Vector3(-1, -1, 0);
-                        ballVelocity = ballVelocity / ballVelocity.magnitude * maxSpeed;
-                        break;
                     case pikachuHitState.HitSmash_DownRight:
-
+                        print("hit smash_down left or right Activated");
                         ballState = ballState.Smash;
                         ballVelocity = new Vector3(1, -1, 0);
-                        ballVelocity = ballVelocity / ballVelocity.magnitude * maxSpeed;
+                        ballVelocity = ballVelocity / ballVelocity.magnitude * smashSpeed;
                         break;
+
                     case pikachuHitState.HitSmash_Left:
-
-                        ballState = ballState.Smash;
-                        ballVelocity = new Vector3(-1, -0.15f, 0);
-                        ballVelocity = ballVelocity / ballVelocity.magnitude * maxSpeed;
-                        break;
                     case pikachuHitState.HitSmash_Right:
-
+                        print("hit smash_left or right Activated");
                         ballState = ballState.Smash;
                         ballVelocity = new Vector3(1, -0.15f, 0);
-                        ballVelocity = ballVelocity / ballVelocity.magnitude * maxSpeed;
+                        ballVelocity = ballVelocity / ballVelocity.magnitude * smashSpeed;
                         break;
-                    case pikachuHitState.HitSmash_Up:
 
+                    case pikachuHitState.HitSmash_Up:
+                        print("hit smash_up Activated");
                         ballState = ballState.Smash;
                         ballVelocity = new Vector3((ballVelocity.x / ballVelocity.x) * 0.15f, 1, 0);
-                        ballVelocity = ballVelocity / ballVelocity.magnitude * maxSpeed;
+                        ballVelocity = ballVelocity / ballVelocity.magnitude * smashSpeed;
                         break;
+
                     case pikachuHitState.HitSmash_UpLeft:
-
-                        ballState = ballState.Smash;
-                        ballVelocity = new Vector3(-1, 1, 0);
-                        ballVelocity = ballVelocity / ballVelocity.magnitude * maxSpeed;
-                        break;
                     case pikachuHitState.HitSmash_UpRight:
-
+                        print("hit smash_up or right Activated");
                         ballState = ballState.Smash;
                         ballVelocity = new Vector3(1, 1, 0);
-                        ballVelocity = ballVelocity / ballVelocity.magnitude * maxSpeed;
+                        ballVelocity = ballVelocity / ballVelocity.magnitude * smashSpeed;
                         break;
+
                     default:
+                        print("pikachuHitState None! check code lines!");
                         break;
 
                 }
@@ -192,6 +189,11 @@ public class Ball : MonoBehaviour
                     //print("ball velocity is slow then pika velocity " + ballVelocity.magnitude);
                     ballVelocity *= (pika1Velocity.magnitude / (ballVelocity.magnitude * Time.fixedDeltaTime));
                     //print("now ball velocity is " + ballVelocity.magnitude);
+                }
+
+                if (ballVelocity.magnitude > maxSpeed)
+                {
+                    ballVelocity = ballVelocity / ballVelocity.magnitude * maxSpeed;
                 }
 
             }
@@ -276,22 +278,19 @@ public class Ball : MonoBehaviour
         }
 
         // 3.3 최대/ 최소속도 제한
-        if (ballVelocity.magnitude >= maxSpeed)
+        if (ballVelocity.magnitude > maxSpeed && ballState == ballState.Normal)
         {
             ballVelocity = ballVelocity / ballVelocity.magnitude * maxSpeed * 0.95f; ;
         }
-        else if (ballVelocity.magnitude < minSpeed)
-        {
-            ballVelocity = ballVelocity / ballVelocity.magnitude * minSpeed * 1.05f;
-        }
 
     }
+    #endregion
 
-
-    // 4. 이동
+    #region 4.About MoveBall
     void MoveBall()
     {
         //일반이동
+        if (ballVelocity != new Vector3()) 
         this.transform.position += ballVelocity * Time.fixedDeltaTime;
 
         //피카충돌시 이동 보정
@@ -304,8 +303,6 @@ public class Ball : MonoBehaviour
                                 
                 Vector3 pika1TempVelocity = new Vector3(pika1TempX, pika1TempY, 0);
                 this.transform.position += pika1TempVelocity*1.5f;
-                print(pika1TempVelocity);
-                //this.transform.position += pika1TempVelocity*-1f;
             }
 
             if (hitCollider.collider.CompareTag("player2") == true)
@@ -318,8 +315,9 @@ public class Ball : MonoBehaviour
             }
         }
     }
+    #endregion
 
-    // 5. 디버그용 함수
+    #region 5.Check move over the mapsize
     void ErrorCheck()
     {
         float smallOffSet = 0.05f;
@@ -357,22 +355,14 @@ public class Ball : MonoBehaviour
         }
         Debug.DrawRay(this.transform.position, ballVelocity / ballVelocity.magnitude, Color.green);
     }
+    #endregion
 
-    // 6. 볼 에니메이션
+    #region 6.BallAnimation
     private float tunningSpeed;     // 양수 = 시계 반대방향  음수 = 시계방향
-    public Sprite[] afterImages;
-
+    
     void BallAnimation()
     {
-        if(ballState == ballState.Normal)
-        {
             tunningSpeed = ballVelocity.magnitude * 10;
-            this.transform.Rotate(Vector3.forward, tunningSpeed*Time.deltaTime);
-        }
-        else if(ballState == ballState.Smash)
-        {
-
-        }
     }
-
+    #endregion 
 }
