@@ -373,7 +373,7 @@ public class Ball : MonoBehaviour
 		}
 		else if(ballState == ballState.Smash)
 		{
-
+			
 		}
 	}
 
