@@ -179,7 +179,7 @@ public class GhostSprites : MonoBehaviour
             OnDestroy(); // this
         } 
 
-        if (ballScript.BallState == ballState.Smash || ballScript.BallState == ballState.Smash)
+        if (ballScript.BallState == ballState.Smash)
         {
             killSwitch = false; // this
             if (killSwitch)

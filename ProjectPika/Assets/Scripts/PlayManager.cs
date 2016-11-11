@@ -363,7 +363,7 @@ public class PlayManager : MonoBehaviour {
     public void ResetBall(int winner)
     {
         Ball.ballVelocity = new Vector3(0, 0, 0);
-
+		ball.GetComponent<Ball> ().BallState = ballState.Normal;
         switch (winner)
         {
             case 1:

@@ -209,6 +209,9 @@ public class Ball : MonoBehaviour
 
                 switch (pika2HitState)
                 {
+					case pikachuHitState.Normal:
+						ballState = ballState.Normal;
+						break;
                     case pikachuHitState.HitSlow:
 
                         ballState = ballState.Smash;

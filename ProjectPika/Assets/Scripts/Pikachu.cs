@@ -197,6 +197,8 @@ public class Pikachu : MonoBehaviour {
         switch (playerState) 
 		{
 		case pikachuState.Ground:
+			GetComponent<BoxCollider2D> ().enabled = false;
+			GetComponent<PolygonCollider2D> ().enabled = true;
             pikaRotation.eulerAngles = new Vector3(0, 0, 0);
             this.transform.rotation = pikaRotation;
             transform.position += pikaVelocity;
@@ -213,6 +215,8 @@ public class Pikachu : MonoBehaviour {
 			transform.position += pikaVelocity;
 			break;
 		case pikachuState.Receive_Left:
+			GetComponent<PolygonCollider2D> ().enabled = false;
+			GetComponent<BoxCollider2D> ().enabled = true;
 			pikaRotation.eulerAngles = new Vector3 (0, 180, 0);
 			this.transform.rotation = pikaRotation;
 			pikaVelocity += (-2f * gravity * Time.fixedDeltaTime + -1.5f * right * Time.fixedDeltaTime);
@@ -222,6 +226,8 @@ public class Pikachu : MonoBehaviour {
             break;
 		case pikachuState.Receive_Right:
             //print("우측 리시브 작동");
+			GetComponent<PolygonCollider2D> ().enabled = false;
+			GetComponent<BoxCollider2D> ().enabled = true;
 			pikaRotation.eulerAngles = new Vector3 (0, 0, 0);
 			this.transform.rotation = pikaRotation;
 			pikaVelocity += (-2f * gravity * Time.fixedDeltaTime + 1.5f * right * Time.fixedDeltaTime);
@@ -237,29 +243,40 @@ public class Pikachu : MonoBehaviour {
 	//move controls for player2
 	private void Move_2p() {
 		pikaVelocity = new Vector3 (); //amount of next frame position change
-		if (Input.anyKey) { //move when input is given
-			if (Input.GetKey (keys ["UP"]) && playerState == pikachuState.Ground) {
-				PlayerState = pikachuState.Jump;
+
+		if (playerState == pikachuState.Ground) {
+			if (Input.GetKey (keys ["UP"]))
+				playerState = pikachuState.Jump;
+			if (Input.GetKey (keys ["LEFT"]) == true && Input.GetKey (keys ["SMASH"]) == true && !receiveCounter) {
+				Debug.Log ("left receive");
+				motionEnergy += 1.5f * jump;
+				pikaVelocity += motionEnergy;
+				//transform.position += pikaVelocity*0.5f;
+				playerState = pikachuState.Receive_Left;
 			}
+
+			if (Input.GetKey (keys ["RIGHT"]) == true && Input.GetKey (keys ["SMASH"]) == true && !receiveCounter) {
+				Debug.Log ("right receive");
+				motionEnergy += 1.5f * jump;
+				pikaVelocity += motionEnergy;
+				//transform.position += pikaVelocity*0.5f;
+				playerState = pikachuState.Receive_Right;
+			}
+		}
+		if (playerState == pikachuState.Ground || playerState == pikachuState.Jump || playerState == pikachuState.AirDrop) {
 			if (Input.GetKey (keys ["LEFT"])) {
 				pikaVelocity -= right * Time.fixedDeltaTime;
-				//if player goes beyond boundary, return fixed vector and reset dir
-				if (transform.position.x - PlayManager.pikaBelly + pikaVelocity.x < PlayManager.mapInfo [2] / 2) {
-					//transform.position = new Vector3 (PlayManager.mapInfo [2] / 2 + PlayManager.pikaBelly, transform.position.y, transform.position.z);
-					pikaVelocity = new Vector3();
-				}
 			}
 			if (Input.GetKey (keys ["RIGHT"])) {
 				pikaVelocity += right * Time.fixedDeltaTime;
-				//if player goes beyond boundary, return fixed vector and reset dir
-				if (transform.position.x + PlayManager.pikaBelly + pikaVelocity.x > PlayManager.mapInfo [0] / 2) {
-					//transform.position = new Vector3 (PlayManager.mapInfo [0] / 2 - PlayManager.pikaBelly, transform.position.y, transform.position.z);
-					pikaVelocity = new Vector3();
-				}
 			}
 		}
 		switch (playerState) {
 		case pikachuState.Ground:
+			GetComponent<BoxCollider2D> ().enabled = false;
+			GetComponent<PolygonCollider2D> ().enabled = true;
+			pikaRotation.eulerAngles = new Vector3 (0, 180, 0);
+			this.transform.rotation = pikaRotation;
 			transform.position += pikaVelocity;
 			break;
 		case pikachuState.Jump:
@@ -273,6 +290,29 @@ public class Pikachu : MonoBehaviour {
 			pikaVelocity += motionEnergy;
 			transform.position += pikaVelocity;
 			break;
+		case pikachuState.Receive_Left:
+			GetComponent<PolygonCollider2D> ().enabled = false;
+			GetComponent<BoxCollider2D> ().enabled = true;
+			pikaRotation.eulerAngles = new Vector3 (0, 180, 0);
+			this.transform.rotation = pikaRotation;
+			pikaVelocity += (-2f * gravity * Time.fixedDeltaTime + -1.5f * right * Time.fixedDeltaTime);
+			transform.position += pikaVelocity;
+			receiveCounter = true;
+			//            print("좌측 리시브 작동");
+			break;
+		case pikachuState.Receive_Right:
+			GetComponent<PolygonCollider2D> ().enabled = false;
+			GetComponent<BoxCollider2D> ().enabled = true;
+			//print("우측 리시브 작동");
+			pikaRotation.eulerAngles = new Vector3 (0, 0, 0);
+			this.transform.rotation = pikaRotation;
+			pikaVelocity += (-2f * gravity * Time.fixedDeltaTime + 1.5f * right * Time.fixedDeltaTime);
+			transform.position += pikaVelocity;
+			receiveCounter = true;
+			break;
+		case pikachuState.GameOver:
+			print ("게임오버!");
+			break;                
 		}
 	}
 
@@ -287,7 +327,6 @@ public class Pikachu : MonoBehaviour {
 
 	//smash controls for player 1
 	private void Smash_1p() {
-//		if (hitState == pikachuHitState.Normal) {
 		if (Input.GetKeyDown (keys ["SMASH"]) && !smashCounter && PlayerState == pikachuState.AirDrop) { //airborn smash
 			if (Input.GetKey (keys ["DOWN"])) {
 				if (Input.GetKey (keys ["RIGHT"]) || Input.GetKey(keys["LEFT"]))
@@ -334,14 +373,5 @@ public class Pikachu : MonoBehaviour {
 			Debug.Log("2p hitstate:"+hitState+"counter"+smashCounter);
 			Invoke ("ReturnNormalHitState", 0.3f);
 		}
-		/*
-		else if (Input.GetKeyDown (keys ["SMASH"]) && !smashCounter && PlayerState == pikachuState.Ground) {
-			if (Input.GetKey (keys ["LEFT"]))
-				PlayerState = pikachuState.Receive_Left;
-			if (Input.GetKey (keys ["RIGHT"]))
-				PlayerState = pikachuState.Receive_Right;
-		}
-		*/
-
 	}
 }
